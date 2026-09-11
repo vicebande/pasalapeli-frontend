@@ -44,3 +44,34 @@ O con Docker y Nginx:
 docker build -t frontend-pasalapeli .
 docker run -p 80:80 frontend-pasalapeli
 ```
+
+---
+
+## ☁️ Despliegue CI/CD (GitHub Actions → EC2)
+
+Este repo se despliega sobre una instancia **EC2 (Ubuntu 24.04)** que ya porta el stack completo. El orquestador vive en el repo [`pasalapeli-database`](https://github.com) (contiene el `docker-compose.yml` global en `/opt/pasalapeli/`).
+
+### Workflow `.github/workflows/deploy.yml`
+En cada `push` a `main`:
+1. SSH al EC2 (acción `appleboy/ssh-action`).
+2. `git pull` del código del frontend en `/opt/pasalapeli/pasalapeli-frontend`.
+3. `docker compose up -d --build frontend`.
+4. Verifica HTTPS y el estado `healthy` del contenedor.
+
+### GitHub Secrets requeridos en este repo
+| Secret | Descripción |
+|---|---|
+| `EC2_HOST` | IP pública del EC2 |
+| `EC2_USER` | Usuario SSH (usualmente `ubuntu`) |
+| `EC2_SSH_KEY` | Clave privada SSH (.pem) |
+
+### Variables de entorno en producción (definidas en el `.env` del orquestador)
+Los valores de Azure AD se inyectan al **build** como argumentos Docker (no son secretos; un *Public Client* de MSAL los expone igualmente):
+- `AZURE_CLIENT_ID` → `ARG AZURE_CLIENT_ID` (build)
+- `AZURE_TENANT_ID` → `ARG AZURE_TENANT_ID` (build)
+- `APP_BASE_URL=https://<tu-dominio>` → `ARG APP_BASE_URL` (build: `redirectUri`, `postLogoutRedirectUri`)
+
+### HTTPS
+- El `nginx.conf` sirve en **443** (certs en `/etc/nginx/certs/`, montados por el compose) y redirige **80 → 443**.
+- Los certificados los emite **Let's Encrypt** (`scripts/` del repo orquestador) y se renuevan automáticamente vía cron.
+- **Requisito:** dominio apuntando al EC2. Azure AD exige redirect URIs HTTPS.
