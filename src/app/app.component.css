@@ -38,9 +38,3 @@
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-
-.footer-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
