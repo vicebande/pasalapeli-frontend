@@ -40,6 +40,10 @@ jobs:
               fi
               sleep 5
             done
+            if [ "$STATUS" != "healthy" ]; then
+              echo "ERROR: $SERVICE no quedo healthy tras 150s" >&2
+              exit 1
+            fi
 
             echo "==> Verificando HTTPS"
             DOMAIN="${{ vars.EC2_DOMAIN }}"
