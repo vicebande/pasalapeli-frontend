@@ -2,7 +2,7 @@ import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MsalService, MsalBroadcastService, MSAL_GUARD_CONFIG, MsalGuardConfiguration } from '@azure/msal-angular';
 import { EventMessage, EventType, AuthenticationResult, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
-import { BehaviorSubject, Observable, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { UserProfile } from '../models/usuario.model';
 
@@ -105,7 +105,7 @@ export class AuthService {
 
   public login(): void {
     if (environment.azureAd.enabled && this.msalService) {
-      if (this.msalGuardConfig.authRequest) {
+      if (this.msalGuardConfig?.authRequest) {
         this.msalService.loginRedirect(this.msalGuardConfig.authRequest as RedirectRequest);
       } else {
         this.msalService.loginRedirect();

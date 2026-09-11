@@ -16,6 +16,7 @@ import {
   MSALGuardConfigFactory,
   MSALInterceptorConfigFactory
 } from './services/msal.config';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -37,10 +38,11 @@ export const appConfig: ApplicationConfig = {
     MsalService,
     MsalGuard,
     MsalBroadcastService,
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: MsalInterceptor,
-      multi: true
-    }
+    // El interceptor solo debe inyectar el Bearer token cuando Azure AD está habilitado.
+    // En modo demo, si estuviera activo, intentaría redirigir a login.microsoftonline.com
+    // con un clientId de relleno, rompiendo el flujo de demostración.
+    ...(environment.azureAd.enabled
+      ? [{ provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true }]
+      : [])
   ]
 };

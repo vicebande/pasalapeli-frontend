@@ -22,7 +22,8 @@ RUN sed -i "s|A_PONE_CLIENT_ID|${AZURE_CLIENT_ID}|g; s|A_PONE_TENANT_ID|${AZURE_
 # Stage 2: Serve with Nginx (HTTP + HTTPS)
 FROM nginx:alpine
 COPY --from=build /app/dist/pasa-la-peli-frontend/browser /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# El nginx.conf modificado (sed con EC2_APPS_HOST) vive en /app del stage build.
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80 443
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --no-check-certificate --tries=1 --spider https://localhost/ || exit 1

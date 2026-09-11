@@ -49,11 +49,14 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string | ProtectedResourceScopes> | null>();
-  
-  // Asocia los endpoints del BFF/API Gateway con los scopes de Azure AD
-  protectedResourceMap.set(environment.apiBaseUrl + '/tickets/*', environment.azureAd.scopes);
-  protectedResourceMap.set(environment.apiBaseUrl + '/admin/*', environment.azureAd.scopes);
-  protectedResourceMap.set(environment.apiBaseUrl + '/auth/me', environment.azureAd.scopes);
+
+  // En modo demo no se protege ningún endpoint: el MsalInterceptor no intercepta nada
+  if (environment.azureAd.enabled) {
+    // Asocia los endpoints del BFF/API Gateway con los scopes de Azure AD
+    protectedResourceMap.set(environment.apiBaseUrl + '/tickets/*', environment.azureAd.scopes);
+    protectedResourceMap.set(environment.apiBaseUrl + '/admin/*', environment.azureAd.scopes);
+    protectedResourceMap.set(environment.apiBaseUrl + '/auth/me', environment.azureAd.scopes);
+  }
 
   return {
     interactionType: InteractionType.Redirect,
