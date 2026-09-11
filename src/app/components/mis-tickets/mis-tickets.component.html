@@ -36,6 +36,7 @@
         <div class="ticket-meta">
           <span><i class="fa-solid fa-desktop"></i> {{ t.sala || 'Sala Asignada' }}</span>
           <span><i class="fa-regular fa-clock"></i> {{ t.fechaCompra | date:'medium' }}</span>
+          <span><i class="fa-solid fa-ticket"></i> {{ t.cantidad ?? 1 }} entrada(s)</span>
         </div>
 
         <div class="payment-summary" *ngIf="t.pago">
