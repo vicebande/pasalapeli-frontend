@@ -30,6 +30,12 @@ export class CompraTicketComponent implements OnInit {
   public errorConflict: string | null = null; // HTTP 409
   public errorGeneral: string | null = null;
 
+  // Checkout simulado con tarjeta
+  public paso: 'detalle' | 'pago' = 'detalle';
+  public tarjeta = { titulares: '', numero: '', expira: '', cvv: '' };
+  public errorPago: string | null = null;
+  private timeoutPago: ReturnType<typeof setTimeout> | null = null;
+
   constructor(
     private carteleraService: CarteleraService,
     private ticketService: TicketService,
@@ -71,8 +77,80 @@ export class CompraTicketComponent implements OnInit {
     return this.funcion.precio * this.cantidad;
   }
 
+  public irAlPago(): void {
+    this.errorPago = null;
+    this.errorGeneral = null;
+    this.paso = 'pago';
+  }
+
+  public volverAlDetalle(): void {
+    this.cancelarPagoDiferido();
+    this.errorPago = null;
+    this.paso = 'detalle';
+  }
+
+  public formatearNumeroTarjeta(): void {
+    this.tarjeta.numero = this.tarjeta.numero
+      .replace(/\D/g, '')
+      .slice(0, 16)
+      .replace(/(\d{4})(?=\d)/g, '$1 ');
+  }
+
+  public formatearExpiracion(): void {
+    let v = this.tarjeta.expira.replace(/\D/g, '').slice(0, 4);
+    if (v.length > 2) {
+      v = v.slice(0, 2) + '/' + v.slice(2);
+    }
+    this.tarjeta.expira = v;
+  }
+
+  public confirmarPago(): void {
+    this.errorPago = null;
+    if (!this.validarTarjeta()) return;
+    this.procesandoCompra = true;
+    // Simula el procesamiento de la transacción con el gateway (pago 100% simulado)
+    this.timeoutPago = setTimeout(() => this.confirmarCompra(), 1200);
+  }
+
+  private cancelarPagoDiferido(): void {
+    if (this.timeoutPago !== null) {
+      clearTimeout(this.timeoutPago);
+      this.timeoutPago = null;
+    }
+    this.procesandoCompra = false;
+  }
+
+  private validarTarjeta(): boolean {
+    const num = this.tarjeta.numero.replace(/\s/g, '');
+    const partes = this.tarjeta.expira.split('/');
+    const mes = partes[0] ? Number(partes[0]) : 0;
+
+    if (
+      this.tarjeta.titulares.trim().length < 3 ||
+      !/^\d{16}$/.test(num) ||
+      !/^\d{2}$/.test(partes[0] || '') ||
+      mes < 1 || mes > 12 ||
+      !/^\d{2}$/.test(partes[1] || '') ||
+      !/^\d{3,4}$/.test(this.tarjeta.cvv)
+    ) {
+      this.errorPago = 'Revisa los datos: titular, número de 16 dígitos, vencimiento MM/AA y CVV de 3-4 dígitos.';
+      return false;
+    }
+    return true;
+  }
+
+  public get tarjetaMarca(): string {
+    const n = this.tarjeta.numero.replace(/\s/g, '');
+    if (n.startsWith('4')) return 'VISA';
+    if (n.startsWith('5')) return 'MASTERCARD';
+    if (n.startsWith('3')) return 'AMEX';
+    if (n.startsWith('6')) return 'DINERS';
+    return 'CARD';
+  }
+
   public confirmarCompra(): void {
     if (!this.funcion) return;
+    this.timeoutPago = null;
 
     this.procesandoCompra = true;
     this.errorConflict = null;
@@ -105,6 +183,7 @@ export class CompraTicketComponent implements OnInit {
   }
 
   public cerrarModal(): void {
+    this.cancelarPagoDiferido();
     this.cerrar.emit();
   }
 }

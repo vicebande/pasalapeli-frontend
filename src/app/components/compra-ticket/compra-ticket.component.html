@@ -62,8 +62,8 @@
       </button>
     </div>
 
-    <!-- PURCHASE FORM (IF NOT GENERATED YET) -->
-    <div *ngIf="!cargandoFuncion && !ticketGenerado && funcion" class="purchase-form">
+    <!-- PURCHASE FORM - STEP 1: DETALLE (IF NOT GENERATED YET) -->
+    <div *ngIf="!cargandoFuncion && !ticketGenerado && funcion && paso === 'detalle'" class="purchase-form">
       <div class="modal-header-title">
         <h2>Comprar Entradas</h2>
         <span class="modal-subtitle">{{ funcion.sala }} - {{ funcion.fecha }} | {{ funcion.hora }}</span>
@@ -132,11 +132,86 @@
       <!-- CONFIRM BUTTON -->
       <div class="modal-actions">
         <button
-          (click)="confirmarCompra()"
+          (click)="irAlPago()"
           [disabled]="procesandoCompra || funcion.entradasDisponibles <= 0"
           class="btn-primary btn-full">
+          <i class="fa-solid fa-lock"></i>
+          Continuar al Pago
+        </button>
+      </div>
+    </div>
+
+    <!-- CHECKOUT STEP: PAGO SIMULADO CON TARJETA -->
+    <div *ngIf="!cargandoFuncion && !ticketGenerado && funcion && paso === 'pago'" class="purchase-form">
+      <div class="modal-header-title">
+        <h2>Pago Simulado</h2>
+        <span class="modal-subtitle">{{ funcion.sala }} - {{ funcion.fecha }} | {{ funcion.hora }}</span>
+      </div>
+
+      <div *ngIf="errorPago" class="error-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ errorPago }}</span>
+      </div>
+
+      <!-- Tarjeta visual (solo demo) -->
+      <div class="card-visual">
+        <div class="card-brand">{{ tarjetaMarca }}</div>
+        <div class="card-number-display">{{ tarjeta.numero || '•••• •••• •••• ••••' }}</div>
+        <div class="card-meta">
+          <span>{{ tarjeta.titulares || 'TITULAR DE LA TARJETA' }}</span>
+          <span>EXP {{ tarjeta.expira || 'MM/AA' }}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Titular de la Tarjeta</label>
+        <input type="text" [(ngModel)]="tarjeta.titulares" name="titular" class="form-input" placeholder="Nombre como aparece en la tarjeta" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Número de Tarjeta</label>
+        <input type="text" [(ngModel)]="tarjeta.numero" name="numTarjeta" class="form-input" inputmode="numeric" (input)="formatearNumeroTarjeta()" placeholder="4242 4242 4242 4242" autocomplete="off" maxlength="19" />
+      </div>
+
+      <div class="checkout-row">
+        <div class="form-group checkout-col">
+          <label class="form-label">Vencimiento</label>
+          <input type="text" [(ngModel)]="tarjeta.expira" name="expira" class="form-input" inputmode="numeric" (input)="formatearExpiracion()" placeholder="MM/AA" autocomplete="off" maxlength="5" />
+        </div>
+        <div class="form-group checkout-col">
+          <label class="form-label">CVV</label>
+          <input type="text" [(ngModel)]="tarjeta.cvv" name="cvv" class="form-input" inputmode="numeric" placeholder="123" autocomplete="off" maxlength="4" />
+        </div>
+      </div>
+
+      <div class="demo-card-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        Demo: usa 4242 4242 4242 4242, cualquier fecha futura y CVV. El pago es 100% simulado.
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Precio Unitario:</span>
+          <span>${{ funcion.precio | number:'1.0-0' }} CLP</span>
+        </div>
+        <div class="summary-row">
+          <span>Entradas:</span>
+          <span>x{{ cantidad }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row summary-total">
+          <span>Total a Pagar:</span>
+          <span class="total-amount">${{ totalPagar | number:'1.0-0' }} CLP</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button (click)="volverAlDetalle()" [disabled]="procesandoCompra" class="btn-ghost btn-full mb-2">
+          <i class="fa-solid fa-arrow-left"></i> Volver
+        </button>
+        <button (click)="confirmarPago()" [disabled]="procesandoCompra" class="btn-primary btn-full">
           <i class="fa-solid" [ngClass]="procesandoCompra ? 'fa-spinner fa-spin' : 'fa-lock'"></i>
-          {{ procesandoCompra ? 'Procesando Transacción...' : 'Pagar y Emitir Ticket' }}
+          {{ procesandoCompra ? 'Procesando Transacción...' : 'Confirmar Pago y Emitir Ticket' }}
         </button>
       </div>
     </div>

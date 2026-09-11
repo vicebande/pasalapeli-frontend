@@ -239,3 +239,89 @@
 .mt-4 {
   margin-top: 1.5rem;
 }
+
+.mb-2 {
+  margin-bottom: 0.75rem;
+}
+
+/* Checkout simulado con tarjeta */
+.checkout-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.checkout-col {
+  flex: 1;
+}
+
+.card-visual {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.card-brand {
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+  margin-bottom: 0.9rem;
+}
+
+.card-number-display {
+  font-family: monospace;
+  font-size: 1.2rem;
+  letter-spacing: 2.5px;
+  margin-bottom: 1rem;
+  color: #e2e8f0;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: #94a3b8;
+}
+
+.demo-card-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.8rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn-ghost {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  color: #fff;
+  border-color: #475569;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}

@@ -1,8 +1,8 @@
 import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MsalService, MsalBroadcastService, MSAL_GUARD_CONFIG, MsalGuardConfiguration } from '@azure/msal-angular';
-import { EventMessage, EventType, AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
-import { BehaviorSubject, Observable, filter } from 'rxjs';
+import { EventMessage, EventType, AuthenticationResult, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
+import { BehaviorSubject, Observable, filter, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { UserProfile } from '../models/usuario.model';
 
@@ -65,6 +65,28 @@ export class AuthService {
         roles: roles.map((r: string) => r.startsWith('ROLE_') ? r : 'ROLE_' + r.toUpperCase()),
         authenticated: true
       });
+      // En modo Azure el id real lo define el BFF (lo registra/recupera en Ticket Service)
+      this.sincronizarPerfilConBFF();
+    }
+  }
+
+  private async sincronizarPerfilConBFF(): Promise<void> {
+    try {
+      const perfil = await firstValueFrom(
+        this.http.get<UserProfile>(`${environment.apiBaseUrl}/auth/me`)
+      );
+      if (!perfil || !perfil.authenticated) return;
+      const actual = this.currentUserSubject.value;
+      const rolesBff = perfil.roles?.filter((r: string) => r.startsWith('ROLE_'));
+      this.currentUserSubject.next({
+        id: perfil.id,
+        email: perfil.email || actual?.email || '',
+        name: perfil.name || actual?.name || '',
+        roles: rolesBff && rolesBff.length ? rolesBff : (actual?.roles || ['ROLE_CLIENTE']),
+        authenticated: true
+      });
+    } catch (error) {
+      console.warn('[AuthService] No se pudo sincronizar el perfil con el BFF; se mantiene el usuario local.', error);
     }
   }
 
@@ -84,7 +106,7 @@ export class AuthService {
   public login(): void {
     if (environment.azureAd.enabled && this.msalService) {
       if (this.msalGuardConfig.authRequest) {
-        this.msalService.loginRedirect({ ...this.msalGuardConfig.authRequest });
+        this.msalService.loginRedirect(this.msalGuardConfig.authRequest as RedirectRequest);
       } else {
         this.msalService.loginRedirect();
       }
