@@ -1,0 +1,109 @@
+<main class="cartelera-page container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> ESTRENOS EXCLUSIVOS 2026</span>
+      <h1 class="hero-title">Vive la Magia del Séptimo Arte</h1>
+      <p class="hero-description">
+        Reserva tus entradas en tiempo real con nuestra plataforma Cloud Native protegida por Azure AD y AWS.
+      </p>
+
+      <!-- Search bar -->
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="busqueda"
+            (keyup.enter)="onBuscar()"
+            placeholder="Buscar por título de película o género..."
+            class="search-input"
+          />
+        </div>
+        <button (click)="onBuscar()" class="btn-primary">
+          Buscar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Movies Grid -->
+  <section class="movies-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="fa-solid fa-film text-red"></i> En Cartelera Hoy
+      </h2>
+      <span class="movies-count">{{ peliculas.length }} películas disponibles</span>
+    </div>
+
+    <!-- Spinner Loading -->
+    <div *ngIf="cargando" class="loading-box">
+      <div class="spinner"></div>
+      <p>Consultando cartelera en Movie Service...</p>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="error-banner">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ error }}</span>
+      <button (click)="cargarPeliculas()" class="btn-retry">Reintentar</button>
+    </div>
+
+    <!-- Movies Grid List -->
+    <div *ngIf="!cargando && peliculas.length > 0" class="movie-grid">
+      <div *ngFor="let pelicula of peliculas" class="movie-card">
+        <!-- Movie Poster -->
+        <div class="poster-container">
+          <img
+            [src]="pelicula.imagen || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80'"
+            [alt]="pelicula.titulo"
+            class="movie-poster"
+            loading="lazy"
+          />
+          <span class="rating-badge badge badge-gold">{{ pelicula.clasificacion }}</span>
+          <div class="poster-overlay">
+            <a [routerLink]="['/pelicula', pelicula.id]" class="btn-primary">
+              <i class="fa-solid fa-ticket"></i> Ver Horarios y Salas
+            </a>
+          </div>
+        </div>
+
+        <!-- Movie Details -->
+        <div class="movie-info">
+          <span class="movie-genre">{{ pelicula.genero }}</span>
+          <h3 class="movie-title">
+            <a [routerLink]="['/pelicula', pelicula.id]">{{ pelicula.titulo }}</a>
+          </h3>
+          <div class="movie-meta">
+            <span><i class="fa-regular fa-clock"></i> {{ pelicula.duracion }} min</span>
+          </div>
+
+          <p class="movie-synopsis">
+            {{ pelicula.descripcion || 'Sin sinopsis disponible.' }}
+          </p>
+
+          <!-- Quick Action -->
+          <div class="movie-actions">
+            <a [routerLink]="['/pelicula', pelicula.id]" class="btn-secondary btn-full">
+              <i class="fa-solid fa-circle-info"></i> Detalles y Funciones
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!cargando && peliculas.length === 0 && !error" class="empty-box">
+      <i class="fa-solid fa-film-slash empty-icon"></i>
+      <h3>No se encontraron películas</h3>
+      <p>Intenta con otro término de búsqueda o revisa la cartelera más tarde.</p>
+    </div>
+  </section>
+
+  <!-- Modal Compra Rápida -->
+  <app-compra-ticket
+    *ngIf="mostrarModalCompra && funcionSeleccionadaId"
+    [funcionId]="funcionSeleccionadaId"
+    (cerrar)="cerrarModalCompra()">
+  </app-compra-ticket>
+</main>

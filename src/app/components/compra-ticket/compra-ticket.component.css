@@ -1,0 +1,241 @@
+.btn-close-modal {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.btn-close-modal:hover {
+  color: #fff;
+  background: var(--bg-card-hover);
+}
+
+.modal-header-title {
+  margin-bottom: 1.5rem;
+}
+
+.modal-header-title h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.modal-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.counter-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.btn-counter {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-elevated);
+  color: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.btn-counter:hover:not(:disabled) {
+  background: #3b82f6;
+}
+
+.btn-counter:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.counter-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.counter-limit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.summary-box {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.summary-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.75rem 0;
+}
+
+.summary-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0;
+}
+
+.total-amount {
+  color: var(--accent-gold);
+}
+
+.conflict-alert {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  color: #ef4444;
+}
+
+.alert-body h4 {
+  color: #f87171;
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.alert-body p {
+  color: #fecaca;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Digital Ticket Success */
+.ticket-success-box {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: var(--success);
+  margin-bottom: 0.75rem;
+}
+
+.success-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.success-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.digital-ticket {
+  background: #0d1322;
+  border: 2px dashed #334155;
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ticket-logo {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+}
+
+.ticket-movie-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.ticket-field {
+  color: var(--text-muted);
+}
+
+.ticket-val-code {
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--accent-gold);
+}
+
+.ticket-val {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ticket-footer {
+  border-top: 1px solid #1e293b;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}
+
+.ticket-qr-sim {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.ticket-qr-sim i {
+  font-size: 1.75rem;
+  color: #fff;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}

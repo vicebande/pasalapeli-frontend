@@ -1,0 +1,69 @@
+<main class="tickets-page container">
+  <div class="page-header">
+    <div class="title-area">
+      <h1><i class="fa-solid fa-ticket text-red"></i> Mis Entradas Compradas</h1>
+      <p>Historial y comprobantes de compras realizadas en Pasa La Peli.</p>
+    </div>
+    <a routerLink="/cartelera" class="btn-primary">
+      <i class="fa-solid fa-cart-plus"></i> Comprar Más Entradas
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading-box">
+    <div class="spinner"></div>
+    <p>Consultando compras en Ticket Service...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-banner">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Tickets Grid -->
+  <div *ngIf="!cargando && tickets.length > 0" class="tickets-grid">
+    <div *ngFor="let t of tickets" class="ticket-card">
+      <div class="ticket-card-header">
+        <span class="ticket-code-tag"><i class="fa-solid fa-hashtag"></i> {{ t.codigo }}</span>
+        <span class="badge" [ngClass]="t.estado === 'PAGADO' ? 'badge-green' : 'badge-gold'">
+          {{ t.estado }}
+        </span>
+      </div>
+
+      <div class="ticket-card-body">
+        <h3 class="ticket-movie">{{ t.peliculaTitulo || 'Función de Cine' }}</h3>
+        <div class="ticket-meta">
+          <span><i class="fa-solid fa-desktop"></i> {{ t.sala || 'Sala Asignada' }}</span>
+          <span><i class="fa-regular fa-clock"></i> {{ t.fechaCompra | date:'medium' }}</span>
+        </div>
+
+        <div class="payment-summary" *ngIf="t.pago">
+          <div class="p-row">
+            <span>Monto Pagado:</span>
+            <strong class="text-gold">${{ t.pago.monto | number:'1.0-0' }} CLP</strong>
+          </div>
+          <div class="p-row">
+            <span>Medio de Pago:</span>
+            <span>{{ t.pago.metodo }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-card-footer">
+        <div class="qr-preview">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>Válido para ingreso a sala</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!cargando && tickets.length === 0 && !error" class="empty-box">
+    <i class="fa-solid fa-ticket-simple empty-icon"></i>
+    <h3>Aún no tienes entradas compradas</h3>
+    <p>Revisa la cartelera y compra tus entradas para tus películas favoritas.</p>
+    <a routerLink="/cartelera" class="btn-primary mt-4">Ver Cartelera</a>
+  </div>
+</main>

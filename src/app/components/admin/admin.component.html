@@ -1,0 +1,178 @@
+<main class="admin-page container">
+  <div class="admin-header">
+    <div>
+      <h1><i class="fa-solid fa-shield-halved text-gold"></i> Panel de Administración</h1>
+      <p>Gestión de Cartelera, Carga de Portadas a Amazon S3 y Programación de Funciones.</p>
+    </div>
+    <span class="badge badge-gold">Acceso con Privilegios ADMIN</span>
+  </div>
+
+  <!-- Banners de Notificación -->
+  <div *ngIf="mensajeExito" class="success-banner">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ mensajeExito }}</span>
+  </div>
+
+  <div *ngIf="mensajeError" class="error-banner">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ mensajeError }}</span>
+  </div>
+
+  <div class="admin-grid">
+    <!-- COLUMNA 1: FORMULARIO CREAR PELÍCULA -->
+    <div class="admin-card">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-clapperboard text-red"></i> Nueva Película</h3>
+        <p>Sube la información de la película y su portada a Amazon S3</p>
+      </div>
+
+      <form (ngSubmit)="guardarPelicula()" class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Título de la Película *</label>
+          <input type="text" [(ngModel)]="nuevaPelicula.titulo" name="titulo" class="form-input" placeholder="Ej: Gladiador II" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Género *</label>
+            <input type="text" [(ngModel)]="nuevaPelicula.genero" name="genero" class="form-input" placeholder="Ej: Acción / Aventura" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duración (min) *</label>
+            <input type="number" [(ngModel)]="nuevaPelicula.duracion" name="duracion" class="form-input" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Clasificación *</label>
+            <select [(ngModel)]="nuevaPelicula.clasificacion" name="clasificacion" class="form-select">
+              <option value="TE">TE (Todo Espectador)</option>
+              <option value="TE+7">TE+7</option>
+              <option value="TE+14">TE+14</option>
+              <option value="18+">Mayores de 18</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL Externa (Opcional)</label>
+            <input type="url" [(ngModel)]="nuevaPelicula.imagen" name="imagen" class="form-input" placeholder="https://..." />
+          </div>
+        </div>
+
+        <!-- Portada Upload to Amazon S3 -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-brands fa-aws text-gold"></i> Subir Portada a Amazon S3
+          </label>
+          <input type="file" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
+          <div *ngIf="vistaPreviaImagen" class="preview-box">
+            <img [src]="vistaPreviaImagen" alt="Previsualización" class="preview-img" />
+            <span class="preview-text">Vista previa de imagen a almacenar en S3</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sinopsis / Descripción</label>
+          <textarea [(ngModel)]="nuevaPelicula.descripcion" name="descripcion" class="form-textarea" rows="3" placeholder="Resumen de la trama..."></textarea>
+        </div>
+
+        <button type="submit" [disabled]="guardandoPelicula" class="btn-primary btn-full">
+          <i class="fa-solid" [ngClass]="guardandoPelicula ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'"></i>
+          {{ guardandoPelicula ? 'Subiendo a Amazon S3 y Guardando...' : 'Registrar Película' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- COLUMNA 2: CATÁLOGO ACTUAL Y FUNCIONES -->
+    <div class="admin-card">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-list-check text-blue"></i> Películas en Catálogo</h3>
+        <p>Administra las películas y añade horarios/funciones a cada una</p>
+      </div>
+
+      <div *ngIf="cargando" class="loading-box">
+        <div class="spinner"></div>
+        <p>Cargando catálogo...</p>
+      </div>
+
+      <div *ngIf="!cargando" class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Portada</th>
+              <th>Título</th>
+              <th>Género</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of peliculas">
+              <td class="poster-td">
+                <img [src]="p.imagen || 'https://via.placeholder.com/60x90'" [alt]="p.titulo" class="table-thumb" />
+              </td>
+              <td>
+                <strong>{{ p.titulo }}</strong>
+                <div class="sub-info">{{ p.duracion }} min | {{ p.clasificacion }}</div>
+              </td>
+              <td><span class="badge badge-blue">{{ p.genero }}</span></td>
+              <td class="actions-td">
+                <button (click)="abrirCrearFuncion(p)" class="btn-action btn-add" title="Programar Función">
+                  <i class="fa-solid fa-calendar-plus"></i>
+                </button>
+                <button (click)="eliminarPelicula(p.id, p.titulo)" class="btn-action btn-del" title="Eliminar Película">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR FUNCIÓN -->
+  <div *ngIf="mostrarModalFuncion && peliculaSeleccionadaParaFuncion" class="modal-backdrop">
+    <div class="modal-content">
+      <button (click)="cerrarModalFuncion()" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      
+      <h2>Programar Nueva Función</h2>
+      <p class="modal-sub">Para: <strong>{{ peliculaSeleccionadaParaFuncion.titulo }}</strong></p>
+
+      <div class="form-group mt-3">
+        <label class="form-label">Fecha de Proyección:</label>
+        <input type="date" [(ngModel)]="nuevaFuncion.fecha" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hora:</label>
+        <input type="time" step="1" [(ngModel)]="nuevaFuncion.hora" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sala:</label>
+        <select [(ngModel)]="nuevaFuncion.sala" class="form-select">
+          <option value="Sala 1 - IMAX">Sala 1 - IMAX</option>
+          <option value="Sala 2 - 3D Atmos">Sala 2 - 3D Atmos</option>
+          <option value="Sala 3 - 2D Premium">Sala 3 - 2D Premium</option>
+          <option value="Sala 4 - 2D Tradicional">Sala 4 - 2D Tradicional</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cupos Disponibles:</label>
+          <input type="number" [(ngModel)]="nuevaFuncion.entradasDisponibles" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio Entrada ($ CLP):</label>
+          <input type="number" [(ngModel)]="nuevaFuncion.precio" class="form-input" />
+        </div>
+      </div>
+
+      <button (click)="guardarFuncion()" [disabled]="guardandoFuncion" class="btn-primary btn-full mt-3">
+        <i class="fa-solid" [ngClass]="guardandoFuncion ? 'fa-spinner fa-spin' : 'fa-calendar-check'"></i>
+        {{ guardandoFuncion ? 'Guardando...' : 'Confirmar y Programar' }}
+      </button>
+    </div>
+  </div>
+</main>

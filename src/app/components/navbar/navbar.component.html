@@ -1,0 +1,59 @@
+<header class="navbar-header">
+  <div class="container navbar-container">
+    <!-- Logo -->
+    <a routerLink="/cartelera" class="navbar-brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-film"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">PASA LA PELI</span>
+        <span class="brand-subtitle">CINE CLOUD NATIVE</span>
+      </div>
+    </a>
+
+    <!-- Navigation links -->
+    <nav class="navbar-nav">
+      <a routerLink="/cartelera" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-clapperboard"></i> Cartelera
+      </a>
+      <a *ngIf="authService.isAuthenticated()" routerLink="/mis-tickets" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-ticket"></i> Mis Tickets
+      </a>
+      <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin">
+        <i class="fa-solid fa-shield-halved"></i> Panel Admin
+      </a>
+    </nav>
+
+    <!-- Auth & User Actions -->
+    <div class="navbar-actions">
+      <!-- Demo role switcher for testing rubric -->
+      <div *ngIf="!isAzureEnabled" class="demo-switch-box">
+        <span class="demo-label">Modo Prueba:</span>
+        <button (click)="toggleRole()" class="btn-demo-toggle" [title]="'Cambiar a ' + (authService.isAdmin() ? 'Cliente' : 'Admin')">
+          <i class="fa-solid" [ngClass]="authService.isAdmin() ? 'fa-user-tie text-gold' : 'fa-user text-blue'"></i>
+          <span>{{ authService.isAdmin() ? 'ADMIN' : 'CLIENTE' }}</span>
+        </button>
+      </div>
+
+      <!-- User status -->
+      <div *ngIf="currentUser" class="user-profile-badge">
+        <div class="user-avatar">
+          <i class="fa-solid fa-circle-user"></i>
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ currentUser.name }}</span>
+          <span class="user-role badge" [ngClass]="authService.isAdmin() ? 'badge-gold' : 'badge-blue'">
+            {{ authService.isAdmin() ? 'Admin' : 'Cliente' }}
+          </span>
+        </div>
+        <button (click)="logout()" class="btn-logout" title="Cerrar Sesión">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+
+      <button *ngIf="!currentUser" (click)="login()" class="btn-primary">
+        <i class="fa-brands fa-microsoft"></i> Iniciar Sesión Azure AD
+      </button>
+    </div>
+  </div>
+</header>

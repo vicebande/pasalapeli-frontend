@@ -1,0 +1,144 @@
+<div class="modal-backdrop">
+  <div class="modal-content">
+    <button (click)="cerrarModal()" class="btn-close-modal" title="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <!-- LOADING STATE -->
+    <div *ngIf="cargandoFuncion" class="loading-box">
+      <div class="spinner"></div>
+      <p>Verificando cupos y función...</p>
+    </div>
+
+    <!-- TICKET GENERATED SUCCESS -->
+    <div *ngIf="ticketGenerado" class="ticket-success-box">
+      <div class="success-icon">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h2 class="success-title">¡Compra Confirmada!</h2>
+      <p class="success-sub">Tu ticket digital ha sido emitido exitosamente.</p>
+
+      <!-- Digital Ticket Card -->
+      <div class="digital-ticket">
+        <div class="ticket-header">
+          <span class="ticket-logo"><i class="fa-solid fa-film"></i> PASA LA PELI</span>
+          <span class="badge badge-green">{{ ticketGenerado.estado }}</span>
+        </div>
+
+        <div class="ticket-body">
+          <div class="ticket-movie-title">{{ ticketGenerado.peliculaTitulo }}</div>
+          <div class="ticket-row">
+            <span class="ticket-field">Código:</span>
+            <span class="ticket-val-code">{{ ticketGenerado.codigo }}</span>
+          </div>
+          <div class="ticket-row">
+            <span class="ticket-field">Sala:</span>
+            <span class="ticket-val">{{ ticketGenerado.sala }}</span>
+          </div>
+          <div class="ticket-row">
+            <span class="ticket-field">Entradas:</span>
+            <span class="ticket-val">{{ ticketGenerado.cantidad || cantidad }}</span>
+          </div>
+          <div class="ticket-row" *ngIf="ticketGenerado.pago">
+            <span class="ticket-field">Monto Pagado:</span>
+            <span class="ticket-val text-gold">${{ ticketGenerado.pago.monto | number:'1.0-0' }} CLP</span>
+          </div>
+          <div class="ticket-row" *ngIf="ticketGenerado.pago">
+            <span class="ticket-field">Método Pago:</span>
+            <span class="ticket-val">{{ ticketGenerado.pago.metodo }}</span>
+          </div>
+        </div>
+
+        <div class="ticket-footer">
+          <div class="ticket-qr-sim">
+            <i class="fa-solid fa-qrcode"></i>
+            <span>Presenta este código al ingresar a la sala</span>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="cerrarModal()" class="btn-primary btn-full mt-4">
+        Aceptar y Volver
+      </button>
+    </div>
+
+    <!-- PURCHASE FORM (IF NOT GENERATED YET) -->
+    <div *ngIf="!cargandoFuncion && !ticketGenerado && funcion" class="purchase-form">
+      <div class="modal-header-title">
+        <h2>Comprar Entradas</h2>
+        <span class="modal-subtitle">{{ funcion.sala }} - {{ funcion.fecha }} | {{ funcion.hora }}</span>
+      </div>
+
+      <!-- HTTP 409 CONFLICT NOTIFICATION -->
+      <div *ngIf="errorConflict" class="conflict-alert">
+        <div class="alert-icon">
+          <i class="fa-solid fa-ban"></i>
+        </div>
+        <div class="alert-body">
+          <h4>HTTP 409 CONFLICT</h4>
+          <p>{{ errorConflict }}</p>
+        </div>
+      </div>
+
+      <!-- GENERAL ERROR -->
+      <div *ngIf="errorGeneral" class="error-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ errorGeneral }}</span>
+      </div>
+
+      <!-- SEAT COUNTER -->
+      <div class="form-group">
+        <label class="form-label">Cantidad de Entradas:</label>
+        <div class="counter-box">
+          <button (click)="decrementar()" [disabled]="cantidad <= 1" class="btn-counter">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <span class="counter-val">{{ cantidad }}</span>
+          <button (click)="incrementar()" [disabled]="cantidad >= funcion.entradasDisponibles" class="btn-counter">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <span class="counter-limit">(Máx. {{ funcion.entradasDisponibles }} disponibles)</span>
+        </div>
+      </div>
+
+      <!-- PAYMENT METHOD -->
+      <div class="form-group">
+        <label class="form-label">Método de Pago:</label>
+        <select [(ngModel)]="metodoPago" class="form-select">
+          <option value="WEBPAY">Webpay Plus (Débito / Redcompra)</option>
+          <option value="TARJETA_CREDITO">Tarjeta de Crédito (Visa / Mastercard)</option>
+          <option value="TARJETA_DEBITO">Tarjeta Débito Bancaria</option>
+          <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+        </select>
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Precio Unitario:</span>
+          <span>${{ funcion.precio | number:'1.0-0' }} CLP</span>
+        </div>
+        <div class="summary-row">
+          <span>Entradas:</span>
+          <span>x{{ cantidad }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row summary-total">
+          <span>Total a Pagar:</span>
+          <span class="total-amount">${{ totalPagar | number:'1.0-0' }} CLP</span>
+        </div>
+      </div>
+
+      <!-- CONFIRM BUTTON -->
+      <div class="modal-actions">
+        <button
+          (click)="confirmarCompra()"
+          [disabled]="procesandoCompra || funcion.entradasDisponibles <= 0"
+          class="btn-primary btn-full">
+          <i class="fa-solid" [ngClass]="procesandoCompra ? 'fa-spinner fa-spin' : 'fa-lock'"></i>
+          {{ procesandoCompra ? 'Procesando Transacción...' : 'Pagar y Emitir Ticket' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
