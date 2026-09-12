@@ -14,7 +14,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           REPO_OWNER: ${{ github.repository_owner }}
-          EC2_APPS_HOST: ${{ vars.EC2_APPS_HOST || 'bff-service' }}
+          EC2_APPS_HOST: ${{ vars.EC2_APPS_HOST || '' }}
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || '00000000-0000-0000-0000-000000000000' }}
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID || 'common' }}
           APP_BASE_URL: ${{ vars.APP_BASE_URL || '' }}
@@ -42,6 +42,11 @@ jobs:
               fi
             fi
             export DOMAIN APP_BASE_URL
+
+            if [ -z "${EC2_APPS_HOST:-}" ]; then
+              echo "ERROR: define la variable EC2_APPS_HOST (IP privada de EC2-APPS) en pasalapeli-frontend > Settings > Secrets and variables > Actions > Variables" >&2
+              exit 1
+            fi
 
             echo "==> Preparando EC2-WEB (Docker, repos y certificado) de forma automatica"
             sudo apt-get update -y
