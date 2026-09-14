@@ -43,9 +43,8 @@ export class TicketService {
     });
   }
 
-  public getMisTickets(usuarioId?: number): Observable<Ticket[]> {
-    const id = usuarioId || this.authService.getUserId();
-    return this.http.get<Ticket[]>(`${this.apiUrl}/usuario/${id}`, {
+  public getMisTickets(): Observable<Ticket[]> {
+    return this.http.get<Ticket[]>(`${this.apiUrl}`, {
       headers: this.getHeaders()
     });
   }

@@ -178,22 +178,26 @@
 
       <div class="form-group">
         <label class="form-label">Titular de la Tarjeta</label>
-        <input type="text" [(ngModel)]="tarjeta.titulares" name="titular" class="form-input" placeholder="Nombre como aparece en la tarjeta" autocomplete="off" />
+        <input type="text" [(ngModel)]="tarjeta.titulares" name="titular" class="form-input" [class.field-error-input]="erroresCampo.titulares" placeholder="Nombre como aparece en la tarjeta" autocomplete="off" />
+        <div *ngIf="erroresCampo.titulares" class="field-error-msg">{{ erroresCampo.titulares }}</div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Número de Tarjeta</label>
-        <input type="text" [(ngModel)]="tarjeta.numero" name="numTarjeta" class="form-input" inputmode="numeric" (input)="formatearNumeroTarjeta()" placeholder="4242 4242 4242 4242" autocomplete="off" maxlength="19" />
+        <input type="text" [(ngModel)]="tarjeta.numero" name="numTarjeta" class="form-input" [class.field-error-input]="erroresCampo.numero" inputmode="numeric" (input)="formatearNumeroTarjeta()" placeholder="4242 4242 4242 4242" autocomplete="off" maxlength="19" />
+        <div *ngIf="erroresCampo.numero" class="field-error-msg">{{ erroresCampo.numero }}</div>
       </div>
 
       <div class="checkout-row">
         <div class="form-group checkout-col">
           <label class="form-label">Vencimiento</label>
-          <input type="text" [(ngModel)]="tarjeta.expira" name="expira" class="form-input" inputmode="numeric" (input)="formatearExpiracion()" placeholder="MM/AA" autocomplete="off" maxlength="5" />
+          <input type="text" [(ngModel)]="tarjeta.expira" name="expira" class="form-input" [class.field-error-input]="erroresCampo.expira" inputmode="numeric" (input)="formatearExpiracion()" placeholder="MM/AA" autocomplete="off" maxlength="5" />
+          <div *ngIf="erroresCampo.expira" class="field-error-msg">{{ erroresCampo.expira }}</div>
         </div>
         <div class="form-group checkout-col">
           <label class="form-label">CVV</label>
-          <input type="text" [(ngModel)]="tarjeta.cvv" name="cvv" class="form-input" inputmode="numeric" placeholder="123" autocomplete="off" maxlength="4" />
+          <input type="password" [(ngModel)]="tarjeta.cvv" name="cvv" class="form-input" [class.field-error-input]="erroresCampo.cvv" inputmode="numeric" placeholder="123" autocomplete="off" maxlength="4" />
+          <div *ngIf="erroresCampo.cvv" class="field-error-msg">{{ erroresCampo.cvv }}</div>
         </div>
       </div>
 

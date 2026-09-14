@@ -36,6 +36,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
   public paso: 'detalle' | 'pago' = 'detalle';
   public tarjeta = { titulares: '', numero: '', expira: '', cvv: '' };
   public errorPago: string | null = null;
+  public erroresCampo: { titulares?: string; numero?: string; expira?: string; cvv?: string } = {};
   private timeoutPago: ReturnType<typeof setTimeout> | null = null;
   private timeoutRedireccion: ReturnType<typeof setTimeout> | null = null;
 
@@ -84,12 +85,14 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
   public irAlPago(): void {
     this.errorPago = null;
     this.errorGeneral = null;
+    this.erroresCampo = {};
     this.paso = 'pago';
   }
 
   public volverAlDetalle(): void {
     this.cancelarPagoDiferido();
     this.errorPago = null;
+    this.erroresCampo = {};
     this.paso = 'detalle';
   }
 
@@ -110,6 +113,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
 
   public confirmarPago(): void {
     this.errorPago = null;
+    this.erroresCampo = {};
     if (!this.validarTarjeta()) return;
     this.procesandoCompra = true;
     // Simula el procesamiento de la transacción con el gateway (pago 100% simulado)
@@ -134,22 +138,59 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
   }
 
   private validarTarjeta(): boolean {
+    this.erroresCampo = {};
+    let valida = true;
+
+    const titulares = this.tarjeta.titulares.trim();
     const num = this.tarjeta.numero.replace(/\s/g, '');
     const partes = this.tarjeta.expira.split('/');
     const mes = partes[0] ? Number(partes[0]) : 0;
+    const anioStr = partes[1] ? partes[1].trim() : '';
 
-    if (
-      this.tarjeta.titulares.trim().length < 3 ||
-      !/^\d{16}$/.test(num) ||
-      !/^\d{2}$/.test(partes[0] || '') ||
-      mes < 1 || mes > 12 ||
-      !/^\d{2}$/.test(partes[1] || '') ||
-      !/^\d{3,4}$/.test(this.tarjeta.cvv)
-    ) {
-      this.errorPago = 'Revisa los datos: titular, número de 16 dígitos, vencimiento MM/AA y CVV de 3-4 dígitos.';
-      return false;
+    if (titulares.length < 3) {
+      this.erroresCampo.titulares = 'Ingresa el nombre del titular tal como aparece en la tarjeta (mínimo 3 letras).';
+      valida = false;
     }
-    return true;
+
+    if (!/^\d{16}$/.test(num)) {
+      this.erroresCampo.numero = 'El número de tarjeta debe tener exactamente 16 dígitos.';
+      valida = false;
+    }
+
+    if (!/^(\d{1,2})$/.test(partes[0] || '')) {
+      this.erroresCampo.expira = 'El mes debe estar entre 01 y 12.';
+      valida = false;
+    } else if (mes < 1 || mes > 12) {
+      this.erroresCampo.expira = 'El mes debe estar entre 01 y 12.';
+      valida = false;
+    }
+
+    if (/^(\d{1,2})$/.test(partes[0] || '') && mes >= 1 && mes <= 12 && !/^(\d{2})$/.test(anioStr)) {
+      this.erroresCampo.expira = 'Ingresa el vencimiento con formato MM/AA (por ejemplo 12/27).';
+      valida = false;
+    }
+
+    if (valida && /^(\d{1,2})$/.test(partes[0] || '') && /^(\d{2})$/.test(anioStr)
+        && mes >= 1 && mes <= 12) {
+      const anio = 2000 + Number(anioStr);
+      const hoy = new Date();
+      const mesActual = hoy.getMonth() + 1;
+      const anioActual = hoy.getFullYear();
+      if (anio < anioActual || (anio === anioActual && mes < mesActual)) {
+        this.erroresCampo.expira = 'La tarjeta está vencida. Usa una fecha de vencimiento futura.';
+        valida = false;
+      }
+    }
+
+    if (!/^\d{3,4}$/.test(this.tarjeta.cvv)) {
+      this.erroresCampo.cvv = 'El CVV debe tener 3 o 4 dígitos.';
+      valida = false;
+    }
+
+    if (!valida) {
+      this.errorPago = 'Revisa los datos de la tarjeta: algunos campos no son válidos.';
+    }
+    return valida;
   }
 
   public get tarjetaMarca(): string {
@@ -184,6 +225,8 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
         this.redirigiendo = true;
         this.timeoutRedireccion = setTimeout(() => {
           this.redirigiendo = false;
+          // Cierra el modal en el padre y navega a Mis Entradas
+          this.cerrar.emit();
           this.router.navigate(['/mis-tickets']);
         }, 2500);
       },
