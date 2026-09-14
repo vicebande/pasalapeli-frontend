@@ -1,4 +1,17 @@
 <div class="modal-backdrop">
+  <!-- PANTALLA DE CARGA FALSA (pago simulado / redirección a Mis Entradas) -->
+  <div *ngIf="procesandoCompra || redirigiendo" class="payment-loading-overlay">
+    <div class="payment-loading-box">
+      <div class="spinner"></div>
+      <p *ngIf="redirigiendo">
+        <i class="fa-solid fa-circle-check text-gold"></i><br/>
+        ¡Pago exitoso!<br/>
+        <span class="loading-subtitle">Redirigiendo a Mis Entradas...</span>
+      </p>
+      <p *ngIf="!redirigiendo">Procesando tu pago de forma segura...</p>
+    </div>
+  </div>
+
   <div class="modal-content">
     <button (click)="cerrarModal()" class="btn-close-modal" title="Cerrar">
       <i class="fa-solid fa-xmark"></i>

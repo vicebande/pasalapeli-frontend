@@ -48,4 +48,16 @@ export class AdminService {
       headers: this.getHeaders()
     });
   }
+
+  public actualizarFuncion(id: number, request: FuncionRequest): Observable<Funcion> {
+    return this.http.put<Funcion>(`${this.apiUrl}/funciones/${id}`, request, {
+      headers: this.getHeaders()
+    });
+  }
+
+  public eliminarFuncion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/funciones/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
 }

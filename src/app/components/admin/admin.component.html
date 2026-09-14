@@ -102,6 +102,7 @@
               <th>Portada</th>
               <th>Título</th>
               <th>Género</th>
+              <th>Funciones / Horarios</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -115,6 +116,21 @@
                 <div class="sub-info">{{ p.duracion }} min | {{ p.clasificacion }}</div>
               </td>
               <td><span class="badge badge-blue">{{ p.genero }}</span></td>
+              <td>
+                <div *ngIf="getFunciones(p.id).length === 0" class="sub-info">Sin funciones programadas</div>
+                <div *ngFor="let f of getFunciones(p.id)" class="funcion-chip">
+                  <span class="funcion-info">
+                    <i class="fa-solid fa-calendar-day text-gold"></i> {{ f.fecha }} {{ f.hora }}
+                    <span class="funcion-meta">{{ f.sala }} · {{ f.entradasDisponibles }} cupos · ${{ f.precio | number:'1.0-0' }}</span>
+                  </span>
+                  <button (click)="abrirEditarFuncion(p, f)" class="btn-action btn-edit" title="Editar Función">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button (click)="eliminarFuncion(p, f)" class="btn-action btn-del" title="Eliminar Función">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
               <td class="actions-td">
                 <button (click)="abrirCrearFuncion(p)" class="btn-action btn-add" title="Programar Función">
                   <i class="fa-solid fa-calendar-plus"></i>
@@ -135,7 +151,7 @@
     <div class="modal-content">
       <button (click)="cerrarModalFuncion()" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
       
-      <h2>Programar Nueva Función</h2>
+      <h2>{{ modalModo === 'editar' ? 'Editar Función' : 'Programar Nueva Función' }}</h2>
       <p class="modal-sub">Para: <strong>{{ peliculaSeleccionadaParaFuncion.titulo }}</strong></p>
 
       <div class="form-group mt-3">
@@ -171,7 +187,7 @@
 
       <button (click)="guardarFuncion()" [disabled]="guardandoFuncion" class="btn-primary btn-full mt-3">
         <i class="fa-solid" [ngClass]="guardandoFuncion ? 'fa-spinner fa-spin' : 'fa-calendar-check'"></i>
-        {{ guardandoFuncion ? 'Guardando...' : 'Confirmar y Programar' }}
+        {{ guardandoFuncion ? 'Guardando...' : (modalModo === 'editar' ? 'Actualizar Función' : 'Confirmar y Programar') }}
       </button>
     </div>
   </div>

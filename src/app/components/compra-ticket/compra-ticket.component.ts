@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CarteleraService } from '../../services/cartelera.service';
 import { TicketService } from '../../services/ticket.service';
 import { AuthService } from '../../services/auth.service';
@@ -14,13 +15,14 @@ import { Ticket } from '../../models/ticket.model';
   templateUrl: './compra-ticket.component.html',
   styleUrls: ['./compra-ticket.component.css']
 })
-export class CompraTicketComponent implements OnInit {
+export class CompraTicketComponent implements OnInit, OnDestroy {
   @Input() funcionId!: number;
   @Output() cerrar = new EventEmitter<void>();
 
   public funcion: Funcion | null = null;
   public cargandoFuncion: boolean = true;
   public procesandoCompra: boolean = false;
+  public redirigiendo: boolean = false;
 
   public cantidad: number = 1;
   public metodoPago: string = 'WEBPAY';
@@ -35,11 +37,13 @@ export class CompraTicketComponent implements OnInit {
   public tarjeta = { titulares: '', numero: '', expira: '', cvv: '' };
   public errorPago: string | null = null;
   private timeoutPago: ReturnType<typeof setTimeout> | null = null;
+  private timeoutRedireccion: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private carteleraService: CarteleraService,
     private ticketService: TicketService,
-    public authService: AuthService
+    public authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -117,7 +121,16 @@ export class CompraTicketComponent implements OnInit {
       clearTimeout(this.timeoutPago);
       this.timeoutPago = null;
     }
+    if (this.timeoutRedireccion !== null) {
+      clearTimeout(this.timeoutRedireccion);
+      this.timeoutRedireccion = null;
+    }
     this.procesandoCompra = false;
+    this.redirigiendo = false;
+  }
+
+  ngOnDestroy(): void {
+    this.cancelarPagoDiferido();
   }
 
   private validarTarjeta(): boolean {
@@ -167,6 +180,12 @@ export class CompraTicketComponent implements OnInit {
       next: (ticketConfirmado) => {
         this.ticketGenerado = ticketConfirmado;
         this.procesandoCompra = false;
+        // Pantalla de carga falsa tras confirmar el pago y redirección a Mis Entradas
+        this.redirigiendo = true;
+        this.timeoutRedireccion = setTimeout(() => {
+          this.redirigiendo = false;
+          this.router.navigate(['/mis-tickets']);
+        }, 2500);
       },
       error: (err) => {
         this.procesandoCompra = false;
