@@ -97,7 +97,7 @@ export class AdminComponent implements OnInit {
       .subscribe({
         next: (peliculaCreada) => {
           this.guardandoPelicula = false;
-          this.mensajeExito = `¡Película "${peliculaCreada.titulo}" registrada exitosamente con portada en S3!`;
+          this.mensajeExito = `¡Película "${peliculaCreada.titulo}" registrada exitosamente con portada!`;
           this.limpiarFormularioPelicula();
           this.cargarPeliculas();
         },
@@ -109,7 +109,7 @@ export class AdminComponent implements OnInit {
   }
 
   public eliminarPelicula(id: number, titulo: string): void {
-    if (confirm(`¿Estás seguro de eliminar "${titulo}" y su imagen asociada en S3?`)) {
+    if (confirm(`¿Estás seguro de eliminar "${titulo}" y su imagen asociada?`)) {
       this.adminService.eliminarPelicula(id).subscribe({
         next: () => {
           this.mensajeExito = `Película "${titulo}" eliminada correctamente.`;

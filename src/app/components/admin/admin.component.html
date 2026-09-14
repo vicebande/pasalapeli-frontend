@@ -2,7 +2,7 @@
   <div class="admin-header">
     <div>
       <h1><i class="fa-solid fa-shield-halved text-gold"></i> Panel de Administración</h1>
-      <p>Gestión de Cartelera, Carga de Portadas a Amazon S3 y Programación de Funciones.</p>
+      <p>Gestión de Cartelera, Carga de Portadas y Programación de Funciones.</p>
     </div>
     <span class="badge badge-gold">Acceso con Privilegios ADMIN</span>
   </div>
@@ -23,7 +23,7 @@
     <div class="admin-card">
       <div class="card-header">
         <h3><i class="fa-solid fa-clapperboard text-red"></i> Nueva Película</h3>
-        <p>Sube la información de la película y su portada a Amazon S3</p>
+        <p>Sube la información de la película y su portada</p>
       </div>
 
       <form (ngSubmit)="guardarPelicula()" class="admin-form">
@@ -59,15 +59,15 @@
           </div>
         </div>
 
-        <!-- Portada Upload to Amazon S3 -->
+        <!-- Portada local -->
         <div class="form-group">
           <label class="form-label">
-            <i class="fa-brands fa-aws text-gold"></i> Subir Portada a Amazon S3
+            <i class="fa-solid fa-image text-gold"></i> Subir Portada
           </label>
           <input type="file" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
           <div *ngIf="vistaPreviaImagen" class="preview-box">
             <img [src]="vistaPreviaImagen" alt="Previsualización" class="preview-img" />
-            <span class="preview-text">Vista previa de imagen a almacenar en S3</span>
+            <span class="preview-text">Vista previa de la portada a guardar</span>
           </div>
         </div>
 
@@ -78,7 +78,7 @@
 
         <button type="submit" [disabled]="guardandoPelicula" class="btn-primary btn-full">
           <i class="fa-solid" [ngClass]="guardandoPelicula ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'"></i>
-          {{ guardandoPelicula ? 'Subiendo a Amazon S3 y Guardando...' : 'Registrar Película' }}
+          {{ guardandoPelicula ? 'Subiendo y Guardando...' : 'Registrar Película' }}
         </button>
       </form>
     </div>
