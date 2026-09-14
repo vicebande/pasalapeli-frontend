@@ -105,10 +105,15 @@ export class AuthService {
 
   public login(): void {
     if (environment.azureAd.enabled && this.msalService) {
-      if (this.msalGuardConfig?.authRequest) {
-        this.msalService.loginRedirect(this.msalGuardConfig.authRequest as RedirectRequest);
-      } else {
-        this.msalService.loginRedirect();
+      try {
+        if (this.msalGuardConfig?.authRequest) {
+          this.msalService.loginRedirect(this.msalGuardConfig.authRequest as RedirectRequest);
+        } else {
+          this.msalService.loginRedirect();
+        }
+      } catch (error) {
+        console.error('[AuthService] Error iniciando login con Azure AD:', error);
+        alert('No se pudo iniciar sesión (consulta la consola del navegador). Error: ' + (error instanceof Error ? error.message : String(error)));
       }
     } else {
       // Alternar login demo
