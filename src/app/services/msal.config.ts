@@ -53,6 +53,8 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   // En modo demo no se protege ningún endpoint: el MsalInterceptor no intercepta nada
   if (environment.azureAd.enabled) {
     // Asocia los endpoints del BFF/API Gateway con los scopes de Azure AD
+    // El exacto "/tickets" cubre el listado de "Mis Entradas"; el comodín cubre el resto.
+    protectedResourceMap.set(environment.apiBaseUrl + '/tickets', environment.azureAd.scopes);
     protectedResourceMap.set(environment.apiBaseUrl + '/tickets/*', environment.azureAd.scopes);
     protectedResourceMap.set(environment.apiBaseUrl + '/admin/*', environment.azureAd.scopes);
     protectedResourceMap.set(environment.apiBaseUrl + '/auth/me', environment.azureAd.scopes);
