@@ -152,3 +152,126 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.refund-modal {
+  max-width: 460px;
+  text-align: center;
+}
+
+.refund-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refund-icon i {
+  font-size: 1.6rem;
+  color: var(--accent-gold);
+}
+
+.refund-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.refund-sub {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 1.25rem;
+}
+
+.mono {
+  font-family: monospace;
+  color: var(--accent-gold);
+}
+
+.refund-info {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.22rem 0;
+}
+
+.r-row strong {
+  color: #e2e8f0;
+  text-align: right;
+}
+
+.refund-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cancel-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  color: #fff;
+  border-color: #475569;
+}
+
+.confirm-btn {
+  background: var(--accent-gold);
+  border: none;
+  color: var(--bg-card);
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: filter 0.2s ease;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.confirm-btn:disabled,
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

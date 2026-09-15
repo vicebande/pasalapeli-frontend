@@ -18,6 +18,7 @@ export class MisTicketsComponent implements OnInit {
   public error: string | null = null;
   public mensajeExito: string | null = null;
   public devolviendoId: number | null = null;
+  public ticketConfirmacion: Ticket | null = null;
 
   constructor(
     private ticketService: TicketService,
@@ -44,12 +45,18 @@ export class MisTicketsComponent implements OnInit {
     });
   }
 
-  public devolverTicket(t: Ticket): void {
+  public solicitarDevolucion(t: Ticket): void {
     if (t.estado !== 'PAGADO') return;
-    const confirmado = confirm(
-      `¿Simular la DEVOLUCIÓN del ticket ${t.codigo}?\n\nSus ${t.cantidad ?? 1} asiento(s) se liberarán de la función y el ticket quedará ANULADO (CANCELADO).`
-    );
-    if (!confirmado) return;
+    this.ticketConfirmacion = t;
+  }
+
+  public cancelarDevolucion(): void {
+    this.ticketConfirmacion = null;
+  }
+
+  public confirmarDevolucion(): void {
+    if (!this.ticketConfirmacion) return;
+    const t = this.ticketConfirmacion;
 
     this.devolviendoId = t.id;
     this.error = null;
@@ -57,11 +64,13 @@ export class MisTicketsComponent implements OnInit {
     this.ticketService.devolverTicket(t.id).subscribe({
       next: (devuelto) => {
         this.devolviendoId = null;
-        this.mensajeExito = `Ticket ${devuelto.codigo} devuelto: se liberaron sus asientos y quedó anulado.`;
+        this.ticketConfirmacion = null;
+        this.mensajeExito = `Ticket ${devuelto.codigo} devuelto: asientos liberados y eliminado de Mis Entradas.`;
         this.cargarTickets();
       },
       error: (err) => {
         this.devolviendoId = null;
+        this.ticketConfirmacion = null;
         this.error = err.error?.message || 'No fue posible realizar la devolución del ticket.';
       }
     });

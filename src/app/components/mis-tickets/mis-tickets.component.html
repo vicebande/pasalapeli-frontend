@@ -64,12 +64,12 @@
         </div>
         <button
           *ngIf="t.estado === 'PAGADO'"
-          (click)="devolverTicket(t)"
+          (click)="solicitarDevolucion(t)"
           [disabled]="devolviendoId === t.id"
           class="btn-refund"
           title="Simular devolución del ticket">
-          <i class="fa-solid" [ngClass]="devolviendoId === t.id ? 'fa-spinner fa-spin' : 'fa-rotate-left'"></i>
-          {{ devolviendoId === t.id ? 'Procesando...' : 'Devolución' }}
+          <i class="fa-solid fa-rotate-left"></i>
+          Devolución
         </button>
       </div>
     </div>
@@ -83,3 +83,39 @@
     <a routerLink="/cartelera" class="btn-primary mt-4">Ver Cartelera</a>
   </div>
 </main>
+
+<!-- Modal: 2da confirmación de devolución -->
+<div *ngIf="ticketConfirmacion" class="modal-backdrop" (click)="cancelarDevolucion()">
+  <div class="modal-content refund-modal" (click)="$event.stopPropagation()">
+    <div class="refund-icon">
+      <i class="fa-solid fa-rotate-left"></i>
+    </div>
+    <h2 class="refund-title">Confirmar Devolución</h2>
+    <p class="refund-sub">
+      ¿Estás seguro de que deseas devolver el ticket
+      <strong class="mono">{{ ticketConfirmacion.codigo }}</strong>?
+    </p>
+
+    <div class="refund-info">
+      <div class="r-row"><span>Película</span><strong>{{ ticketConfirmacion.peliculaTitulo }}</strong></div>
+      <div class="r-row"><span>Entradas</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
+      <div class="r-row"><span>Asientos a liberar</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
+      <div class="r-row"><span>Monto reembolsado</span><strong class="text-gold">${{ ticketConfirmacion.pago?.monto | number:'1.0-0' }} CLP</strong></div>
+    </div>
+
+    <p class="refund-warning">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      Acción definitiva: el ticket se eliminará y ya no aparecerá en Mis Entradas.
+    </p>
+
+    <div class="modal-actions">
+      <button (click)="cancelarDevolucion()" [disabled]="devolviendoId !== null" class="cancel-btn btn-full">
+        <i class="fa-solid fa-xmark"></i> Cancelar
+      </button>
+      <button (click)="confirmarDevolucion()" [disabled]="devolviendoId !== null" class="confirm-btn btn-full">
+        <i class="fa-solid" [ngClass]="devolviendoId === ticketConfirmacion.id ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+        {{ devolviendoId === ticketConfirmacion.id ? 'Devolviendo...' : 'Sí, Devolver Ticket' }}
+      </button>
+    </div>
+  </div>
+</div>
