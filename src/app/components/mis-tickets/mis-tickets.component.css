@@ -108,3 +108,47 @@
   font-size: 1.25rem;
   color: #fff;
 }
+
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(22, 163, 74, 0.12);
+  border: 1px solid rgba(22, 163, 74, 0.4);
+  color: #4ade80;
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.ticket-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-refund {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-refund:hover:not(:disabled) {
+  background: var(--accent-gold);
+  color: var(--bg-card);
+}
+
+.btn-refund:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

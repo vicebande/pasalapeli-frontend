@@ -26,6 +26,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
 
   public cantidad: number = 1;
   public metodoPago: string = 'WEBPAY';
+  private compraEnCurso: boolean = false;
 
   // Estados de resultado
   public ticketGenerado: Ticket | null = null;
@@ -115,9 +116,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
     this.errorPago = null;
     this.erroresCampo = {};
     if (!this.validarTarjeta()) return;
-    this.procesandoCompra = true;
-    // Simula el procesamiento de la transacción con el gateway (pago 100% simulado)
-    this.timeoutPago = setTimeout(() => this.confirmarCompra(), 1200);
+    this.confirmarCompra();
   }
 
   private cancelarPagoDiferido(): void {
@@ -203,10 +202,13 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
   }
 
   public confirmarCompra(): void {
+    if (this.compraEnCurso) return;
     if (!this.funcion) return;
-    this.timeoutPago = null;
+    this.compraEnCurso = true;
 
     this.procesandoCompra = true;
+    this.redirigiendo = false;
+    this.ticketGenerado = null;
     this.errorConflict = null;
     this.errorGeneral = null;
 
@@ -217,29 +219,81 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
       metodoPago: this.metodoPago
     };
 
+    const inicio = Date.now();
     this.ticketService.comprarTicket(request).subscribe({
-      next: (ticketConfirmado) => {
-        this.ticketGenerado = ticketConfirmado;
-        this.procesandoCompra = false;
-        // Pantalla de carga falsa tras confirmar el pago y redirección a Mis Entradas
-        this.redirigiendo = true;
-        this.timeoutRedireccion = setTimeout(() => {
-          this.redirigiendo = false;
-          // Cierra el modal en el padre y navega a Mis Entradas
-          this.cerrar.emit();
-          this.router.navigate(['/mis-tickets']);
-        }, 2500);
-      },
-      error: (err) => {
-        this.procesandoCompra = false;
-        // Identificación del código HTTP 409 Conflict según diagrama de secuencia
-        if (err.status === 409) {
-          this.errorConflict = 'Conflicto 409: Lo sentimos, las entradas seleccionadas ya no están disponibles o superan el cupo disponible.';
-        } else if (err.status === 401) {
-          this.errorGeneral = 'Error de autenticación (401). Inicia sesión para continuar.';
+      next: (ticketConfirmado) => this.finalizarCompraExitosa(ticketConfirmado, inicio),
+      error: (err) => this.manejarErrorCompra(err)
+    });
+  }
+
+  private finalizarCompraExitosa(ticket: Ticket, inicio: number): void {
+    const restante = 1200 - (Date.now() - inicio);
+    this.timeoutPago = setTimeout(() => {
+      this.procesandoCompra = false;
+      this.redirigiendo = true;
+      this.ticketGenerado = ticket;
+      this.compraEnCurso = false;
+
+      // Cierra el modal en el padre y navega a Mis Entradas (siempre tras éxito)
+      this.timeoutRedireccion = setTimeout(() => {
+        this.redirigiendo = false;
+        this.cerrar.emit();
+        this.router.navigate(['/mis-tickets']);
+      }, 2000);
+    }, restante > 0 ? restante : 0);
+  }
+
+  private manejarErrorCompra(err: any): void {
+    if (err.status === 409) {
+      this.compraEnCurso = false;
+      this.procesandoCompra = false;
+      this.ticketGenerado = null;
+      this.errorConflict = 'Conflicto 409: Lo sentimos, las entradas seleccionadas ya no están disponibles o superan el cupo disponible.';
+    } else if (err.status === 401) {
+      this.compraEnCurso = false;
+      this.procesandoCompra = false;
+      this.ticketGenerado = null;
+      this.errorGeneral = 'Error de autenticación (401). Inicia sesión para continuar.';
+    } else {
+      // Posible falso error: el ticket pudo haberse emitido igualmente (timeout/respuesta perdida).
+      this.verificarCompraRealizada(err);
+    }
+  }
+
+  private verificarCompraRealizada(err: any): void {
+    if (!this.funcion) {
+      this.compraEnCurso = false;
+      this.procesandoCompra = false;
+      return;
+    }
+    const funcionId = this.funcion.id;
+    const cantidad = this.cantidad;
+    const limite = Date.now() - 120000;
+
+    this.ticketService.getMisTickets().subscribe({
+      next: (tickets) => {
+        const coincidente = tickets.find((t) =>
+          t.funcionId === funcionId &&
+          t.cantidad === cantidad &&
+          (() => {
+            const f = new Date(t.fechaCompra).getTime();
+            return !isNaN(f) && f >= limite;
+          })()
+        );
+        if (coincidente) {
+          this.finalizarCompraExitosa(coincidente, Date.now() - 1200);
         } else {
+          this.compraEnCurso = false;
+          this.procesandoCompra = false;
+          this.ticketGenerado = null;
           this.errorGeneral = err.error?.message || 'Ocurrió un error inesperado al procesar la compra.';
         }
+      },
+      error: () => {
+        this.compraEnCurso = false;
+        this.procesandoCompra = false;
+        this.ticketGenerado = null;
+        this.errorGeneral = err.error?.message || 'Ocurrió un error inesperado al procesar la compra.';
       }
     });
   }

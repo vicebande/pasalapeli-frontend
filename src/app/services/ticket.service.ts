@@ -48,4 +48,10 @@ export class TicketService {
       headers: this.getHeaders()
     });
   }
+
+  public devolverTicket(id: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.apiUrl}/${id}/devolver`, null, {
+      headers: this.getHeaders()
+    });
+  }
 }

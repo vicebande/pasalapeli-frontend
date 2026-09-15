@@ -15,6 +15,12 @@
     <p>Consultando compras en Ticket Service...</p>
   </div>
 
+  <!-- Success -->
+  <div *ngIf="mensajeExito" class="success-banner">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ mensajeExito }}</span>
+  </div>
+
   <!-- Error -->
   <div *ngIf="error" class="error-banner">
     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -56,6 +62,15 @@
           <i class="fa-solid fa-qrcode"></i>
           <span>Válido para ingreso a sala</span>
         </div>
+        <button
+          *ngIf="t.estado === 'PAGADO'"
+          (click)="devolverTicket(t)"
+          [disabled]="devolviendoId === t.id"
+          class="btn-refund"
+          title="Simular devolución del ticket">
+          <i class="fa-solid" [ngClass]="devolviendoId === t.id ? 'fa-spinner fa-spin' : 'fa-rotate-left'"></i>
+          {{ devolviendoId === t.id ? 'Procesando...' : 'Devolución' }}
+        </button>
       </div>
     </div>
   </div>

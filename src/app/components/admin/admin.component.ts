@@ -210,9 +210,11 @@ export class AdminComponent implements OnInit {
           : '¡Función programada exitosamente en Movie Service!';
         this.cargarPeliculas();
       },
-      error: () => {
+      error: (err) => {
         this.guardandoFuncion = false;
-        alert('Error al guardar la función.');
+        const detalle = err.error?.message || err.message || 'Error al guardar la función.';
+        console.error('[Admin] Error al guardar la función:', err);
+        alert('Error al guardar la función: ' + detalle);
       }
     });
   }
