@@ -32,6 +32,13 @@ jobs:
             COMPOSE_FILE=docker-compose.web.yml
             SERVICE=frontend
 
+            # Lock compartido por los deploys de frontend sobre EC2-WEB:
+            # serializa docker compose up para evitar conflictos de contenedor.
+            LOCKFILE=/tmp/pasalapeli-deploy.lock
+            exec 9>"$LOCKFILE"
+            flock -x -w 1800 9
+            echo "==> Lock adquirido $LOCKFILE (despliegue "$SERVICE")"
+
             # APP_BASE_URL: si no viene definida, deriva de EC2_DOMAIN
             DOMAIN="${EC2_DOMAIN:-}"
             if [ -z "$APP_BASE_URL" ]; then
@@ -85,3 +92,4 @@ jobs:
             fi
 
             docker compose -f "$COMPOSE_FILE" ps "$SERVICE"
+            flock -u 9
