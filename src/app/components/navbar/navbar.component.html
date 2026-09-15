@@ -57,3 +57,5 @@
     </div>
   </div>
 </header>
+
+<app-terminos *ngIf="mostrarTerminos" (aceptado)="aceptarTerminos()" (rechazado)="cerrarTerminos()"></app-terminos>
