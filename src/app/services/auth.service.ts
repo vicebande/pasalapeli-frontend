@@ -2,7 +2,7 @@ import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MsalService, MsalBroadcastService, MSAL_GUARD_CONFIG, MsalGuardConfiguration } from '@azure/msal-angular';
 import { EventMessage, EventType, AuthenticationResult, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
-import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom, take } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { UserProfile } from '../models/usuario.model';
 
@@ -44,11 +44,61 @@ export class AuthService {
       this.msalBroadcastService.inProgress$
         .pipe(filter((status: InteractionStatus) => status === InteractionStatus.None))
         .subscribe(() => {
-          this.checkActiveAccount();
+          this.resolveAuth();
         });
     } else {
       // Modo Demo local predeterminado para pruebas directas
       this.setDemoUser('CLIENTE');
+    }
+  }
+
+  /**
+   * Espera a que MSAL haya restaurado la sesión y resuelve con el usuario actual.
+   * Permite que los guards evalúen roles de forma correcta tras una recarga de página.
+   */
+  public waitForAuthReady(): Promise<UserProfile | null> {
+    const user = this.currentUserSubject.value;
+    if (!environment.azureAd.enabled || user?.authenticated) {
+      return Promise.resolve(user);
+    }
+
+    return new Promise<UserProfile | null>((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve(this.currentUserSubject.value);
+      };
+
+      this.msalBroadcastService?.inProgress$
+        .pipe(
+          filter((status: InteractionStatus) => status === InteractionStatus.None),
+          take(1)
+        )
+        .subscribe(() => {
+          this.resolveAuth().then(finish);
+        });
+
+      setTimeout(finish, 8000);
+    });
+  }
+
+  private async resolveAuth(): Promise<void> {
+    this.ensureActiveAccount();
+    this.checkActiveAccount();
+    if (this.currentUserSubject.value?.authenticated) {
+      await this.sincronizarPerfilConBFF();
+    }
+  }
+
+  private ensureActiveAccount(): void {
+    if (!this.msalService) return;
+    const instance = this.msalService.instance;
+    if (!instance.getActiveAccount()) {
+      const accounts = instance.getAllAccounts();
+      if (accounts.length > 0) {
+        instance.setActiveAccount(accounts[0]);
+      }
     }
   }
 

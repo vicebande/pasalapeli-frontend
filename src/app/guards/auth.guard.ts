@@ -11,8 +11,9 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(): boolean | UrlTree {
-    if (this.authService.isAuthenticated()) {
+  async canActivate(): Promise<boolean | UrlTree> {
+    const user = await this.authService.waitForAuthReady();
+    if (user?.authenticated) {
       return true;
     }
     return this.router.parseUrl('/cartelera');

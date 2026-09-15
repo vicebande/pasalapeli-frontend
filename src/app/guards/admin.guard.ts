@@ -11,8 +11,9 @@ export class AdminGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(): boolean | UrlTree {
-    if (this.authService.isAdmin()) {
+  async canActivate(): Promise<boolean | UrlTree> {
+    const user = await this.authService.waitForAuthReady();
+    if (user?.roles.includes('ROLE_ADMIN')) {
       return true;
     }
     alert('Acceso restringido: Se requiere rol de Administrador.');
