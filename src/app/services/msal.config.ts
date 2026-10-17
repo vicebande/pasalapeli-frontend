@@ -52,9 +52,14 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
   // En modo demo no se protege ningún endpoint: el MsalInterceptor no intercepta nada
   if (environment.azureAd.enabled) {
-    // Toda llamada al BFF (tickets, notificaciones, admin, auth, cartelera) lleva Bearer.
-    // Un prefijo unico evita olvidar rutas nuevas en el mapa.
-    protectedResourceMap.set(environment.apiBaseUrl, environment.azureAd.scopes);
+    // Solo los endpoints que el BFF exige autenticados (tickets, notificaciones,
+    // admin y auth/me). /api/cartelera es publica: si entrara en el mapa, un
+    // usuario anonimo que solo navega la cartelera seria redirigido a Microsoft
+    // por el interceptor sin haber pulsado "Iniciar sesion".
+    const rutasProtegidas = ['/auth/me', '/tickets', '/notificaciones', '/admin'];
+    rutasProtegidas.forEach(ruta => {
+      protectedResourceMap.set(`${environment.apiBaseUrl}${ruta}`, environment.azureAd.scopes);
+    });
   }
 
   return {
