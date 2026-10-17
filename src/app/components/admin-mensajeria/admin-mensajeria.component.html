@@ -1,0 +1,105 @@
+<section class="msg-admin">
+  <div class="msg-header">
+    <h3><i class="fa-solid fa-tower-broadcast text-red"></i> Mensajería Asíncrona (RabbitMQ)</h3>
+    <p>Administra los destinos de notificación y las reglas de distribución de eventos.</p>
+  </div>
+
+  <div *ngIf="mensajeExito" class="success-banner">
+    <i class="fa-solid fa-circle-check"></i> <span>{{ mensajeExito }}</span>
+  </div>
+  <div *ngIf="mensajeError" class="error-banner">
+    <i class="fa-solid fa-triangle-exclamation"></i> <span>{{ mensajeError }}</span>
+  </div>
+
+  <div class="msg-grid">
+    <!-- Destinos -->
+    <div class="msg-card">
+      <h4><i class="fa-solid fa-bullseye text-blue"></i> Destinos</h4>
+
+      <table class="msg-table" *ngIf="destinos.length > 0">
+        <thead>
+          <tr><th>Nombre</th><th>Tipo</th><th>Valor</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of destinos">
+            <td>{{ d.nombre }}</td>
+            <td><span class="chip">{{ d.tipo }}</span></td>
+            <td>{{ d.valor || '—' }}</td>
+            <td>
+              <button class="btn-del" (click)="eliminarDestino(d)" title="Eliminar destino">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="msg-empty" *ngIf="destinos.length === 0">Sin destinos configurados.</p>
+
+      <form class="msg-form" (ngSubmit)="crearDestino()">
+        <input class="msg-input" type="text" [(ngModel)]="nuevoDestino.nombre" name="nombre" placeholder="Nombre del destino" />
+        <select class="msg-input" [(ngModel)]="nuevoDestino.tipo" name="tipo">
+          <option *ngFor="let t of tiposDestino" [value]="t">{{ t }}</option>
+        </select>
+        <input *ngIf="requiereValor" class="msg-input" type="text" [(ngModel)]="nuevoDestino.valor"
+               name="valor" [placeholder]="nuevoDestino.tipo === 'ROL' ? 'Rol (ADMIN/CLIENTE)' : 'ID de usuario'" />
+        <button class="btn-add" type="submit"><i class="fa-solid fa-plus"></i> Crear destino</button>
+      </form>
+    </div>
+
+    <!-- Reglas -->
+    <div class="msg-card">
+      <h4><i class="fa-solid fa-diagram-project text-gold"></i> Reglas de distribución</h4>
+
+      <table class="msg-table" *ngIf="reglas.length > 0">
+        <thead>
+          <tr><th>Evento</th><th>Destino</th><th>Activo</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reglas">
+            <td><span class="chip chip-event">{{ r.evento }}</span></td>
+            <td>{{ r.destinoNombre }}</td>
+            <td>{{ r.activo ? 'Sí' : 'No' }}</td>
+            <td>
+              <button class="btn-del" (click)="eliminarRegla(r)" title="Eliminar regla">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="msg-empty" *ngIf="reglas.length === 0">Sin reglas configuradas.</p>
+
+      <form class="msg-form" (ngSubmit)="crearRegla()">
+        <select class="msg-input" [(ngModel)]="nuevaRegla.evento" name="evento">
+          <option *ngFor="let e of eventos" [value]="e">{{ e }}</option>
+        </select>
+        <select class="msg-input" [(ngModel)]="nuevaRegla.destinoId" name="destinoId">
+          <option [ngValue]="0" disabled>Seleccione destino...</option>
+          <option *ngFor="let d of destinos" [ngValue]="d.id">{{ d.nombre }}</option>
+        </select>
+        <button class="btn-add" type="submit"><i class="fa-solid fa-plus"></i> Crear regla</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mensajes fallidos -->
+  <div class="msg-card msg-full">
+    <h4><i class="fa-solid fa-triangle-exclamation text-gold"></i> Mensajes fallidos (Dead-Letter Queue)</h4>
+    <table class="msg-table" *ngIf="mensajesFallidos.length > 0">
+      <thead>
+        <tr><th>Cola</th><th>Error</th><th>Intentos</th><th>Fecha</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of mensajesFallidos">
+          <td>{{ m.cola }}</td>
+          <td class="msg-error">{{ m.error }}</td>
+          <td>{{ m.intentos }}</td>
+          <td>{{ m.fechaCreacion | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="msg-empty" *ngIf="mensajesFallidos.length === 0">
+      No hay mensajes fallidos. ✅
+    </p>
+  </div>
+</section>

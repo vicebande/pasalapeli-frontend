@@ -1,0 +1,48 @@
+<!-- Campana de notificaciones (solo usuarios autenticados) -->
+<div class="notif-wrapper" *ngIf="authService.isAuthenticated()">
+  <button class="notif-bell" (click)="togglePanel()" [class.activa]="abierto" title="Notificaciones">
+    <i class="fa-solid fa-bell"></i>
+    <span *ngIf="noLeidas > 0" class="notif-badge">{{ noLeidas > 99 ? '99+' : noLeidas }}</span>
+  </button>
+
+  <div class="notif-backdrop" *ngIf="abierto" (click)="cerrarPanel()"></div>
+
+  <div class="notif-panel" *ngIf="abierto">
+    <div class="notif-panel-header">
+      <span class="notif-panel-title"><i class="fa-solid fa-inbox"></i> Notificaciones</span>
+      <button class="notif-mark-all" *ngIf="noLeidas > 0" (click)="marcarTodas()">
+        Marcar todas
+      </button>
+    </div>
+
+    <div class="notif-list">
+      <div class="notif-empty" *ngIf="cargando">
+        <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
+      </div>
+
+      <div class="notif-empty" *ngIf="!cargando && notificaciones.length === 0">
+        <i class="fa-regular fa-bell-slash"></i>
+        <p>No tienes notificaciones</p>
+      </div>
+
+      <div class="notif-item"
+           *ngFor="let n of notificaciones; trackBy: trackById"
+           [class.no-leida]="!n.leida"
+           (click)="marcarLeida(n)">
+        <div class="notif-icon" [ngClass]="n.tipo">
+          <i class="fa-solid"
+             [ngClass]="n.tipo === 'PELICULA_CREADA' ? 'fa-film'
+                       : (n.tipo === 'TICKET_PAGADO' ? 'fa-circle-check' : 'fa-rotate-left')"></i>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">
+            {{ n.titulo }}
+            <span *ngIf="!n.leida" class="notif-dot" title="No leída"></span>
+          </div>
+          <div class="notif-item-msg">{{ n.mensaje }}</div>
+          <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

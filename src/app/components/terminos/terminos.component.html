@@ -1,0 +1,114 @@
+<div class="modal-backdrop" (click)="rechazado.emit()">
+  <div class="modal-content terminos-modal" (click)="$event.stopPropagation()">
+    <div class="terminos-icon">
+      <i class="fa-solid fa-file-contract"></i>
+    </div>
+    <h2 class="terminos-title">Términos y Condiciones</h2>
+    <p class="terminos-sub">
+      Antes de iniciar sesión en <strong>Pasa La Peli</strong>, revisa y acepta las siguientes
+      condiciones de uso del servicio.
+    </p>
+
+    <div class="terminos-scroll">
+      <h3>1. Objeto del servicio</h3>
+      <p>
+        Pasa La Peli es una plataforma en línea de venta de entradas para funciones de cine.
+        Permite al Usuario consultar la cartelera, seleccionar una función, sala y horario,
+        adquirir entradas de forma electrónica y gestionar su compra (incluida la posibilidad
+        de solicitar la devolución de un ticket conforme a la política del sitio).
+      </p>
+
+      <h3>2. Aceptación y capacidad</h3>
+      <p>
+        Al marcar la casilla «He leído y acepto…» usted declara haber leído, comprendido y
+        aceptado estos Términos y Condiciones. Para comprar entradas debe ser mayor de 18 años
+        o contar con autorización de un adulto responsable. La cuenta está asociada a una
+        identidad autenticada mediante Microsoft Entra ID (Azure AD) y es de uso personal e
+        intransferible.
+      </p>
+
+      <h3>3. Compras, precios y pagos</h3>
+      <p>
+        Los precios se expresan en pesos chilenos (CLP) e incluyen los impuestos aplicables
+        conforme a la legislación tributaria chilena. Los pagos se procesan a través de los
+        medios disponibles en la plataforma (por ejemplo, Webpay) y están sujetos a la
+        validación y autorización de la institución emisora. La emisión del comprobante
+        (boleta) se realiza de forma electrónica, de acuerdo con lo dispuesto por el Servicio
+        de Impuestos Internos (SII).
+      </p>
+
+      <h3>4. Entradas y asistencia a la función</h3>
+      <p>
+        Cada ticket es válido únicamente para la película, sala, función y horario señalados.
+        La clasificación de edad de cada película se corresponde con la calificación
+        cinematográfica vigente (Ley N° 19.132), y es responsabilidad del Usuario respetarla.
+        El acceso a la sala puede requerir la presentación del comprobante y documentos de
+        identidad que acrediten la edad.
+      </p>
+
+      <h3>5. Derecho a retracto y devoluciones</h3>
+      <p>
+        En conformidad con la Ley N° 19.496 (Protección de los Derechos de los Consumidores) y
+        su modificación (Ley N° 21.398), el derecho a retracto de 10 días no aplica a los
+        servicios especificados para una fecha u horario determinado, como lo son las entradas
+        para funciones de cine. No obstante, la plataforma ofrece una política de devolución
+        propia, según la cual un ticket pagado puede devolverse a través de la opción
+        «Devolución» en Mis Entradas, liberando el o los asientos asociados. Las consultas y
+        reclamos pueden dirigirse al SERNAC en los términos de la Ley N° 19.496.
+      </p>
+
+      <h3>6. Protección de datos personales</h3>
+      <p>
+        Los datos personales entregados (nombre, correo electrónico y datos de compra) serán
+        tratados de acuerdo con la Ley N° 19.628 (Protección de la Vida Privada). La
+        autenticación se realiza mediante Microsoft Entra ID (Azure AD), que entrega a la
+        plataforma únicamente la información necesaria para identificar al Usuario. No se
+        venden ni ceden datos personales a terceros con fines comerciales. Usted puede
+        solicitar el acceso, rectificación o eliminación de sus datos conforme a la ley.
+      </p>
+
+      <h3>7. Disponibilidad y cambios de programación</h3>
+      <p>
+        La cartelera, horarios, salas y precios pueden variar por decisión del cine o por causa
+        de fuerza mayor. En caso de cancelación de una función, se procurará informar al
+        Usuario y gestionar el reembolso o reprogramación según corresponda.
+      </p>
+
+      <h3>8. Uso correcto de la plataforma</h3>
+      <p>
+        El Usuario se compromete a usar el sitio de buena fe, sin incurrir en fraudes,
+        automatización de compras en masa o cualquier conducta que afecte la disponibilidad de
+        entradas para otros usuarios. La plataforma se reserva el derecho de restringir el
+        acceso ante uso indebido.
+      </p>
+
+      <h3>9. Validez electrónica</h3>
+      <p>
+        De conformidad con la Ley N° 19.799 (Documentos Electrónicos), estos Términos y
+        Condiciones y los comprobantes emitidos por la plataforma constituyen documentos
+        electrónicos válidos y con plena fuerza probatoria.
+      </p>
+
+      <h3>10. Modificaciones y contacto</h3>
+      <p>
+        Pasa La Peli podrá actualizar estos Términos y Condiciones, publicando la versión
+        vigente en el sitio. El uso continuado del servicio tras una actualización implica su
+        aceptación. Ante dudas o reclamos, puede contactar a soporte a través del sitio.
+      </p>
+    </div>
+
+    <label class="terminos-check">
+      <input type="checkbox" [(ngModel)]="aceptaTerminos" />
+      <span>He leído y acepto los Términos y Condiciones y la Política de Privacidad.</span>
+    </label>
+
+    <div class="modal-actions">
+      <button (click)="rechazado.emit()" class="cancel-btn btn-full">
+        <i class="fa-solid fa-xmark"></i> Rechazar
+      </button>
+      <button (click)="aceptado.emit()" [disabled]="!aceptaTerminos" class="confirm-btn btn-full">
+        <i class="fa-solid fa-right-to-bracket"></i> Aceptar e Iniciar Sesión
+      </button>
+    </div>
+  </div>
+</div>

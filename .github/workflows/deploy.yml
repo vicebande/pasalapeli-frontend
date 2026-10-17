@@ -1,0 +1,95 @@
+name: Deploy frontend a EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build y deploy a EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preparar EC2-WEB y desplegar frontend
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          EC2_APPS_HOST: ${{ vars.EC2_APPS_HOST || '' }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || '00000000-0000-0000-0000-000000000000' }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID || 'common' }}
+          APP_BASE_URL: ${{ vars.APP_BASE_URL || '' }}
+          EC2_DOMAIN: ${{ vars.EC2_DOMAIN || '' }}
+          CERTBOT_EMAIL: ${{ vars.CERTBOT_EMAIL || '' }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 30m
+          envs: REPO_OWNER,EC2_APPS_HOST,AZURE_CLIENT_ID,AZURE_TENANT_ID,APP_BASE_URL,EC2_DOMAIN,CERTBOT_EMAIL
+          script: |
+            set -euo pipefail
+            COMPOSE_DIR=/opt/pasalapeli/pasalapeli-database
+            COMPOSE_FILE=docker-compose.web.yml
+            SERVICE=frontend
+
+            # Lock compartido por los deploys de frontend sobre EC2-WEB:
+            # serializa docker compose up para evitar conflictos de contenedor.
+            LOCKFILE=/tmp/pasalapeli-deploy.lock
+            exec 9>"$LOCKFILE"
+            flock -x -w 1800 9
+            echo "==> Lock adquirido $LOCKFILE (despliegue "$SERVICE")"
+
+            # APP_BASE_URL: si no viene definida, deriva de EC2_DOMAIN
+            DOMAIN="${EC2_DOMAIN:-}"
+            if [ -z "$APP_BASE_URL" ]; then
+              if [ -n "$DOMAIN" ]; then
+                APP_BASE_URL="https://$DOMAIN"
+              else
+                APP_BASE_URL="https://localhost"
+              fi
+            fi
+            export DOMAIN APP_BASE_URL
+
+            if [ -z "${EC2_APPS_HOST:-}" ]; then
+              echo "ERROR: define la variable EC2_APPS_HOST (IP privada de EC2-APPS) en pasalapeli-frontend > Settings > Secrets and variables > Actions > Variables" >&2
+              exit 1
+            fi
+
+            echo "==> Preparando EC2-WEB (Docker, repos y certificado) de forma automatica"
+            sudo apt-get update -y
+            sudo apt-get install -y curl git
+
+            curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/pasalapeli-database/main/scripts/bootstrap-web.sh" -o /tmp/bootstrap-web.sh
+            chmod +x /tmp/bootstrap-web.sh
+            bash /tmp/bootstrap-web.sh
+
+            echo "==> Pulling latest code"
+            cd /opt/pasalapeli/pasalapeli-frontend
+            git pull --ff-only origin main
+
+            echo "==> Building and restarting $SERVICE (APP_BASE_URL=$APP_BASE_URL, EC2_APPS_HOST=$EC2_APPS_HOST)"
+            cd "$COMPOSE_DIR"
+            EC2_APPS_HOST="$EC2_APPS_HOST" AZURE_CLIENT_ID="$AZURE_CLIENT_ID" AZURE_TENANT_ID="$AZURE_TENANT_ID" APP_BASE_URL="$APP_BASE_URL" docker compose -f "$COMPOSE_FILE" up -d --build "$SERVICE"
+
+            echo "==> Waiting for health check..."
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format '{{.State.Health.Status}}' pasalapeli-frontend 2>/dev/null || echo "starting")
+              echo "    [$i/30] Status: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                echo "==> frontend HEALTHY"
+                break
+              fi
+              sleep 5
+            done
+            if [ "$STATUS" != "healthy" ]; then
+              echo "ERROR: $SERVICE no quedo healthy tras 150s" >&2
+              exit 1
+            fi
+
+            echo "==> Verificando HTTPS"
+            if [ -n "$DOMAIN" ]; then
+              curl -fsS -o /dev/null -w "https://$DOMAIN -> %{http_code}\n" "https://$DOMAIN/" || echo "WARN: HTTPS no responde aun"
+            fi
+
+            docker compose -f "$COMPOSE_FILE" ps "$SERVICE"
+            flock -u 9
