@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
@@ -31,7 +32,8 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
-    public authService: AuthService
+    public authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -85,7 +87,12 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
         this.notificaciones = pagina?.content || [];
         this.hayMas = this.paginaActual + 1 < (pagina?.totalPages ?? 1);
         this.cargando = false;
-        this.actualizarConteo();
+        // Al abrir la bandeja se marcan todas como leidas automaticamente.
+        if (this.noLeidas > 0 || this.notificaciones.some(n => !n.leida)) {
+          this.marcarTodas();
+        } else {
+          this.actualizarConteo();
+        }
       },
       error: (e) => {
         this.cargando = false;
@@ -121,6 +128,30 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       },
       error: (e) => console.warn('[Notificaciones] No se pudo marcar como leida', n.id, e)
     });
+  }
+
+  /** Click en un item: lo marca como leida y, si es un anuncio de pelicula,
+   *  navega al detalle de esa pelicula (/pelicula/{id}). */
+  public abrirNotificacion(n: Notificacion): void {
+    this.marcarLeida(n);
+    if (this.esAnuncioPelicula(n)) {
+      this.router.navigate(['/pelicula', n.referencia]);
+      this.cerrarPanel();
+    }
+  }
+
+  public esAnuncioPelicula(n: Notificacion): boolean {
+    return n.tipo === 'PELICULA_CREADA' && /^\d+$/.test(n.referencia ?? '');
+  }
+
+  public iconoDe(n: Notificacion): string {
+    switch (n.tipo) {
+      case 'PELICULA_CREADA': return 'fa-film';
+      case 'PELICULA_ELIMINADA': return 'fa-ban';
+      case 'TICKET_PAGADO': return 'fa-circle-check';
+      case 'TICKET_DEVUELTO': return 'fa-rotate-left';
+      default: return 'fa-bell';
+    }
   }
 
   public marcarTodas(): void {

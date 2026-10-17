@@ -28,11 +28,10 @@
         <div class="notif-item"
            *ngFor="let n of notificaciones; trackBy: trackById"
            [class.no-leida]="!n.leida"
-           (click)="marcarLeida(n)">
+           [class.navegable]="esAnuncioPelicula(n)"
+           (click)="abrirNotificacion(n)">
         <div class="notif-icon" [ngClass]="n.tipo">
-          <i class="fa-solid"
-             [ngClass]="n.tipo === 'PELICULA_CREADA' ? 'fa-film'
-                       : (n.tipo === 'TICKET_PAGADO' ? 'fa-circle-check' : 'fa-rotate-left')"></i>
+          <i class="fa-solid" [ngClass]="iconoDe(n)"></i>
         </div>
         <div class="notif-body">
           <div class="notif-item-title">
@@ -42,6 +41,7 @@
           <div class="notif-item-msg">{{ n.mensaje }}</div>
           <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
         </div>
+        <i class="fa-solid fa-chevron-right notif-go" *ngIf="esAnuncioPelicula(n)"></i>
       </div>
 
       <button class="notif-load-more"

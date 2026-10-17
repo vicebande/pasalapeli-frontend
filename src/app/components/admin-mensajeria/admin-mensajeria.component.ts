@@ -20,7 +20,7 @@ export class AdminMensajeriaComponent implements OnInit {
   public reglas: ReglaDistribucion[] = [];
   public mensajesFallidos: MensajeFallido[] = [];
 
-  public readonly eventos = ['PELICULA_CREADA', 'TICKET_PAGADO', 'TICKET_DEVUELTO'];
+  public readonly eventos = ['PELICULA_CREADA', 'PELICULA_ELIMINADA', 'TICKET_PAGADO', 'TICKET_DEVUELTO'];
   public readonly tiposDestino = ['TODOS', 'ROL', 'USUARIO', 'USUARIO_EVENTO'];
 
   public nuevoDestino: Partial<DestinoNotificacion> = {
