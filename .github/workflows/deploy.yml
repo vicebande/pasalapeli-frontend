@@ -81,7 +81,8 @@ jobs:
 
             echo "==> Pulling latest code"
             cd /opt/pasalapeli/pasalapeli-frontend
-            git pull --ff-only origin main
+            git fetch --prune origin
+            git reset --hard origin/main
 
             echo "==> Building and restarting $SERVICE (APP_BASE_URL=$APP_BASE_URL, EC2_APPS_HOST=$EC2_APPS_HOST)"
             cd "$COMPOSE_DIR"
