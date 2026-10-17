@@ -52,15 +52,9 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
   // En modo demo no se protege ningún endpoint: el MsalInterceptor no intercepta nada
   if (environment.azureAd.enabled) {
-    // Asocia los endpoints del BFF con los scopes de Azure AD
-    // El exacto "/tickets" cubre el listado de "Mis Entradas"; el comodín cubre el resto.
-    protectedResourceMap.set(environment.apiBaseUrl + '/tickets', environment.azureAd.scopes);
-    protectedResourceMap.set(environment.apiBaseUrl + '/tickets/*', environment.azureAd.scopes);
-    protectedResourceMap.set(environment.apiBaseUrl + '/admin/*', environment.azureAd.scopes);
-    protectedResourceMap.set(environment.apiBaseUrl + '/auth/me', environment.azureAd.scopes);
-    // Campana de notificaciones: sin Bearer el endpoint responde 401 en Azure.
-    protectedResourceMap.set(environment.apiBaseUrl + '/notificaciones', environment.azureAd.scopes);
-    protectedResourceMap.set(environment.apiBaseUrl + '/notificaciones/*', environment.azureAd.scopes);
+    // Toda llamada al BFF (tickets, notificaciones, admin, auth, cartelera) lleva Bearer.
+    // Un prefijo unico evita olvidar rutas nuevas en el mapa.
+    protectedResourceMap.set(environment.apiBaseUrl, environment.azureAd.scopes);
   }
 
   return {

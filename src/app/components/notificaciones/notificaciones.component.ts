@@ -18,10 +18,15 @@ import { Notificacion } from '../../models/notificacion.model';
   styleUrls: ['./notificaciones.component.css']
 })
 export class NotificacionesComponent implements OnInit, OnDestroy {
+  private static readonly TAMANO_PAGINA = 20;
+
   public abierto = false;
   public noLeidas = 0;
   public notificaciones: Notificacion[] = [];
   public cargando = false;
+  public cargandoMas = false;
+  public hayMas = false;
+  private paginaActual = 0;
   private subs = new Subscription();
 
   constructor(
@@ -74,15 +79,35 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
 
   public cargarNotificaciones(): void {
     this.cargando = true;
-    this.notificationService.getMisNotificaciones().subscribe({
-      next: (data) => {
-        this.notificaciones = data || [];
+    this.paginaActual = 0;
+    this.notificationService.getMisNotificaciones(this.paginaActual, NotificacionesComponent.TAMANO_PAGINA).subscribe({
+      next: (pagina) => {
+        this.notificaciones = pagina?.content || [];
+        this.hayMas = this.paginaActual + 1 < (pagina?.totalPages ?? 1);
         this.cargando = false;
         this.actualizarConteo();
       },
       error: (e) => {
         this.cargando = false;
         console.warn('[Notificaciones] No se pudo cargar la bandeja', e);
+      }
+    });
+  }
+
+  public cargarMas(): void {
+    if (this.cargandoMas || !this.hayMas) return;
+    this.cargandoMas = true;
+    const siguiente = this.paginaActual + 1;
+    this.notificationService.getMisNotificaciones(siguiente, NotificacionesComponent.TAMANO_PAGINA).subscribe({
+      next: (pagina) => {
+        this.notificaciones = [...this.notificaciones, ...(pagina?.content || [])];
+        this.paginaActual = siguiente;
+        this.hayMas = this.paginaActual + 1 < (pagina?.totalPages ?? 1);
+        this.cargandoMas = false;
+      },
+      error: (e) => {
+        this.cargandoMas = false;
+        console.warn('[Notificaciones] No se pudo cargar más notificaciones', e);
       }
     });
   }

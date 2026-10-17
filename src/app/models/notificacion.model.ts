@@ -12,6 +12,15 @@ export interface NotificacionCount {
   count: number;
 }
 
+/** Respuesta paginada de la bandeja (?page&size) para "cargar más". */
+export interface PageNotificaciones<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface DestinoNotificacion {
   id: number;
   nombre: string;

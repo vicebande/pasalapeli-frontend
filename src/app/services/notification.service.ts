@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Notificacion, NotificacionCount } from '../models/notificacion.model';
+import { Notificacion, NotificacionCount, PageNotificaciones } from '../models/notificacion.model';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -25,8 +25,11 @@ export class NotificationService {
     return headers;
   }
 
-  public getMisNotificaciones(): Observable<Notificacion[]> {
-    return this.http.get<Notificacion[]>(this.apiUrl, { headers: this.getHeaders() });
+  public getMisNotificaciones(page = 0, size = 20): Observable<PageNotificaciones<Notificacion>> {
+    return this.http.get<PageNotificaciones<Notificacion>>(
+      `${this.apiUrl}?page=${page}&size=${size}`,
+      { headers: this.getHeaders() }
+    );
   }
 
   public getConteoNoLeidas(): Observable<NotificacionCount> {

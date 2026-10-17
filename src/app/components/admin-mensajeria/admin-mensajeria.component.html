@@ -1,6 +1,6 @@
 <section class="msg-admin">
   <div class="msg-header">
-    <h3><i class="fa-solid fa-tower-broadcast text-red"></i> Mensajería Asíncrona (RabbitMQ)</h3>
+    <h3><i class="fa-solid fa-tower-broadcast text-red"></i> Mensajería Asíncrona (AWS SNS/SQS)</h3>
     <p>Administra los destinos de notificación y las reglas de distribución de eventos.</p>
   </div>
 
@@ -36,12 +36,12 @@
       <p class="msg-empty" *ngIf="destinos.length === 0">Sin destinos configurados.</p>
 
       <form class="msg-form" (ngSubmit)="crearDestino()">
-        <input class="msg-input" type="text" [(ngModel)]="nuevoDestino.nombre" name="nombre" placeholder="Nombre del destino" />
-        <select class="msg-input" [(ngModel)]="nuevoDestino.tipo" name="tipo">
+        <input class="msg-input" type="text" [(ngModel)]="nuevoDestino.nombre" name="nombre" placeholder="Nombre del destino" aria-label="Nombre del destino" />
+        <select class="msg-input" [(ngModel)]="nuevoDestino.tipo" name="tipo" aria-label="Tipo de destino">
           <option *ngFor="let t of tiposDestino" [value]="t">{{ t }}</option>
         </select>
         <input *ngIf="requiereValor" class="msg-input" type="text" [(ngModel)]="nuevoDestino.valor"
-               name="valor" [placeholder]="nuevoDestino.tipo === 'ROL' ? 'Rol (ADMIN/CLIENTE)' : 'ID de usuario'" />
+               name="valor" [placeholder]="nuevoDestino.tipo === 'ROL' ? 'Rol (ADMIN/CLIENTE)' : 'ID de usuario'" aria-label="Valor del destino" />
         <button class="btn-add" type="submit"><i class="fa-solid fa-plus"></i> Crear destino</button>
       </form>
     </div>
@@ -70,10 +70,10 @@
       <p class="msg-empty" *ngIf="reglas.length === 0">Sin reglas configuradas.</p>
 
       <form class="msg-form" (ngSubmit)="crearRegla()">
-        <select class="msg-input" [(ngModel)]="nuevaRegla.evento" name="evento">
+        <select class="msg-input" [(ngModel)]="nuevaRegla.evento" name="evento" aria-label="Evento de la regla">
           <option *ngFor="let e of eventos" [value]="e">{{ e }}</option>
         </select>
-        <select class="msg-input" [(ngModel)]="nuevaRegla.destinoId" name="destinoId">
+        <select class="msg-input" [(ngModel)]="nuevaRegla.destinoId" name="destinoId" aria-label="Destino de la regla">
           <option [ngValue]="0" disabled>Seleccione destino...</option>
           <option *ngFor="let d of destinos" [ngValue]="d.id">{{ d.nombre }}</option>
         </select>

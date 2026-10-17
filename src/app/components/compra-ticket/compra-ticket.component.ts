@@ -238,7 +238,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
       this.timeoutRedireccion = setTimeout(() => {
         this.redirigiendo = false;
         this.cerrar.emit();
-        this.router.navigate(['/mis-tickets']);
+        void this.router.navigate(['/mis-tickets']);
       }, 2000);
     }, restante > 0 ? restante : 0);
   }
@@ -277,7 +277,7 @@ export class CompraTicketComponent implements OnInit, OnDestroy {
           t.cantidad === cantidad &&
           (() => {
             const f = new Date(t.fechaCompra).getTime();
-            return !isNaN(f) && f >= limite;
+            return !Number.isNaN(f) && f >= limite;
           })()
         );
         if (coincidente) {

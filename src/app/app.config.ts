@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withInterceptors, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
   MSAL_INSTANCE,
   MSAL_GUARD_CONFIG,
@@ -16,13 +16,14 @@ import {
   MSALGuardConfigFactory,
   MSALInterceptorConfigFactory
 } from './services/msal.config';
+import { authErrorInterceptor } from './services/auth-error.interceptor';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authErrorInterceptor])),
     {
       provide: MSAL_INSTANCE,
       useFactory: MSALInstanceFactory

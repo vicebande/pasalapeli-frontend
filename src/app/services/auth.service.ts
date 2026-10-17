@@ -44,7 +44,7 @@ export class AuthService {
       this.msalBroadcastService.inProgress$
         .pipe(filter((status: InteractionStatus) => status === InteractionStatus.None))
         .subscribe(() => {
-          this.resolveAuth();
+          void this.resolveAuth();
         });
     } else {
       // Modo Demo local predeterminado para pruebas directas
@@ -76,7 +76,7 @@ export class AuthService {
           take(1)
         )
         .subscribe(() => {
-          this.resolveAuth().then(finish);
+          void this.resolveAuth().then(finish);
         });
 
       setTimeout(finish, 8000);
@@ -116,7 +116,7 @@ export class AuthService {
         authenticated: true
       });
       // En modo Azure el id real lo define el BFF (lo registra/recupera en Ticket Service)
-      this.sincronizarPerfilConBFF();
+      void this.sincronizarPerfilConBFF();
     }
   }
 

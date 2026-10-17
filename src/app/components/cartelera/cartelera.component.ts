@@ -38,6 +38,7 @@ export class CarteleraComponent implements OnInit {
         this.cargando = false;
       },
       error: (err) => {
+        console.warn('[Cartelera] Error cargando películas', err);
         this.error = 'No fue posible cargar las películas. Verifica la conexión con el BFF y Movie Service.';
         this.cargando = false;
       }

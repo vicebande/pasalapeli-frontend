@@ -28,25 +28,25 @@
 
       <form (ngSubmit)="guardarPelicula()" class="admin-form">
         <div class="form-group">
-          <label class="form-label">Título de la Película *</label>
-          <input type="text" [(ngModel)]="nuevaPelicula.titulo" name="titulo" class="form-input" placeholder="Ej: Gladiador II" required />
+          <label class="form-label" for="pelicula-titulo">Título de la Película *</label>
+          <input type="text" id="pelicula-titulo" [(ngModel)]="nuevaPelicula.titulo" name="titulo" class="form-input" placeholder="Ej: Gladiador II" required />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Género *</label>
-            <input type="text" [(ngModel)]="nuevaPelicula.genero" name="genero" class="form-input" placeholder="Ej: Acción / Aventura" required />
+            <label class="form-label" for="pelicula-genero">Género *</label>
+            <input type="text" id="pelicula-genero" [(ngModel)]="nuevaPelicula.genero" name="genero" class="form-input" placeholder="Ej: Acción / Aventura" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Duración (min) *</label>
-            <input type="number" [(ngModel)]="nuevaPelicula.duracion" name="duracion" class="form-input" required />
+            <label class="form-label" for="pelicula-duracion">Duración (min) *</label>
+            <input type="number" id="pelicula-duracion" [(ngModel)]="nuevaPelicula.duracion" name="duracion" class="form-input" required />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Clasificación *</label>
-            <select [(ngModel)]="nuevaPelicula.clasificacion" name="clasificacion" class="form-select">
+            <label class="form-label" for="pelicula-clasificacion">Clasificación *</label>
+            <select id="pelicula-clasificacion" [(ngModel)]="nuevaPelicula.clasificacion" name="clasificacion" class="form-select">
               <option value="TE">TE (Todo Espectador)</option>
               <option value="TE+7">TE+7</option>
               <option value="TE+14">TE+14</option>
@@ -54,17 +54,17 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">URL Externa (Opcional)</label>
-            <input type="url" [(ngModel)]="nuevaPelicula.imagen" name="imagen" class="form-input" placeholder="https://..." />
+            <label class="form-label" for="pelicula-imagen">URL Externa (Opcional)</label>
+            <input type="url" id="pelicula-imagen" [(ngModel)]="nuevaPelicula.imagen" name="imagen" class="form-input" placeholder="https://..." />
           </div>
         </div>
 
         <!-- Portada local -->
         <div class="form-group">
-          <label class="form-label">
+          <label class="form-label" for="pelicula-portada">
             <i class="fa-solid fa-image text-gold"></i> Subir Portada
           </label>
-          <input type="file" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
+          <input type="file" id="pelicula-portada" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
           <div *ngIf="vistaPreviaImagen" class="preview-box">
             <img [src]="vistaPreviaImagen" alt="Previsualización" class="preview-img" />
             <span class="preview-text">Vista previa de la portada a guardar</span>
@@ -72,8 +72,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Sinopsis / Descripción</label>
-          <textarea [(ngModel)]="nuevaPelicula.descripcion" name="descripcion" class="form-textarea" rows="3" placeholder="Resumen de la trama..."></textarea>
+          <label class="form-label" for="pelicula-descripcion">Sinopsis / Descripción</label>
+          <textarea id="pelicula-descripcion" [(ngModel)]="nuevaPelicula.descripcion" name="descripcion" class="form-textarea" rows="3" placeholder="Resumen de la trama..."></textarea>
         </div>
 
         <button type="submit" [disabled]="guardandoPelicula" class="btn-primary btn-full">
@@ -158,18 +158,18 @@
       <p class="modal-sub">Para: <strong>{{ peliculaSeleccionadaParaFuncion.titulo }}</strong></p>
 
       <div class="form-group mt-3">
-        <label class="form-label">Fecha de Proyección:</label>
-        <input type="date" [(ngModel)]="nuevaFuncion.fecha" class="form-input" />
+        <label class="form-label" for="funcion-fecha">Fecha de Proyección:</label>
+        <input type="date" id="funcion-fecha" [(ngModel)]="nuevaFuncion.fecha" class="form-input" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">Hora:</label>
-        <input type="time" step="1" [(ngModel)]="nuevaFuncion.hora" class="form-input" />
+        <label class="form-label" for="funcion-hora">Hora:</label>
+        <input type="time" id="funcion-hora" step="1" [(ngModel)]="nuevaFuncion.hora" class="form-input" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">Sala:</label>
-        <select [(ngModel)]="nuevaFuncion.sala" class="form-select">
+        <label class="form-label" for="funcion-sala">Sala:</label>
+        <select id="funcion-sala" [(ngModel)]="nuevaFuncion.sala" class="form-select">
           <option value="Sala 1 - IMAX">Sala 1 - IMAX</option>
           <option value="Sala 2 - 3D Atmos">Sala 2 - 3D Atmos</option>
           <option value="Sala 3 - 2D Premium">Sala 3 - 2D Premium</option>
@@ -179,12 +179,12 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Cupos Disponibles:</label>
-          <input type="number" [(ngModel)]="nuevaFuncion.entradasDisponibles" class="form-input" />
+          <label class="form-label" for="funcion-cupos">Cupos Disponibles:</label>
+          <input type="number" id="funcion-cupos" [(ngModel)]="nuevaFuncion.entradasDisponibles" class="form-input" />
         </div>
         <div class="form-group">
-          <label class="form-label">Precio Entrada ($ CLP):</label>
-          <input type="number" [(ngModel)]="nuevaFuncion.precio" class="form-input" />
+          <label class="form-label" for="funcion-precio">Precio Entrada ($ CLP):</label>
+          <input type="number" id="funcion-precio" [(ngModel)]="nuevaFuncion.precio" class="form-input" />
         </div>
       </div>
 

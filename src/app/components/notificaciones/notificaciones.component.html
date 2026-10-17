@@ -25,7 +25,7 @@
         <p>No tienes notificaciones</p>
       </div>
 
-      <div class="notif-item"
+        <div class="notif-item"
            *ngFor="let n of notificaciones; trackBy: trackById"
            [class.no-leida]="!n.leida"
            (click)="marcarLeida(n)">
@@ -43,6 +43,14 @@
           <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
         </div>
       </div>
+
+      <button class="notif-load-more"
+              *ngIf="hayMas"
+              [disabled]="cargandoMas"
+              (click)="$event.stopPropagation(); cargarMas()">
+        <i class="fa-solid" [ngClass]="cargandoMas ? 'fa-spinner fa-spin' : 'fa-chevron-down'"></i>
+        {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
+      </button>
     </div>
   </div>
 </div>
