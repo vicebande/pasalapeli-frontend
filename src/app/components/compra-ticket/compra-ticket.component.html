@@ -70,6 +70,18 @@
         </div>
       </div>
 
+      <!-- RECUERDO DE DEVOLUCION EN EL TICKET EMITIDO -->
+      <div class="refund-notice success-refund" *ngIf="funcion">
+        <div class="refund-notice-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="refund-notice-body">
+          <strong>Recuerda</strong>
+          <p>
+            Este ticket puede devolverse hasta <strong>1 hora antes</strong> de la función
+            ({{ funcion.fecha }} | {{ funcion.hora }}) desde "Mis Entradas".
+          </p>
+        </div>
+      </div>
+
       <button (click)="cerrarModal()" class="btn-primary btn-full mt-4">
         Aceptar y Volver
       </button>
@@ -142,6 +154,19 @@
         </div>
       </div>
 
+      <!-- POLITICA DE DEVOLUCION (1 hora antes de la funcion) -->
+      <div class="refund-notice">
+        <div class="refund-notice-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <div class="refund-notice-body">
+          <strong>Política de devolución</strong>
+          <p>
+            Puedes devolver tus entradas hasta <strong>1 hora antes</strong> de la función
+            ({{ funcion.fecha }} | {{ funcion.hora }}). Después de ese plazo la devolución
+            no está permitida.
+          </p>
+        </div>
+      </div>
+
       <!-- CONFIRM BUTTON -->
       <div class="modal-actions">
         <button
@@ -204,6 +229,18 @@
       <div class="demo-card-hint">
         <i class="fa-solid fa-circle-info"></i>
         Demo: usa 4242 4242 4242 4242, cualquier fecha futura y CVV. El pago es 100% simulado.
+      </div>
+
+      <!-- POLITICA DE DEVOLUCION (recuerdo antes de pagar) -->
+      <div class="refund-notice">
+        <div class="refund-notice-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <div class="refund-notice-body">
+          <strong>Política de devolución</strong>
+          <p>
+            Tras el pago podrás devolver este ticket hasta <strong>1 hora antes</strong> de la
+            función ({{ funcion.fecha }} | {{ funcion.hora }}).
+          </p>
+        </div>
       </div>
 
       <div class="summary-box">

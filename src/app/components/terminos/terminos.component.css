@@ -37,7 +37,7 @@
 }
 
 .terminos-scroll h3 {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--accent-gold);
   margin: 1rem 0 0.3rem;
@@ -50,7 +50,7 @@
 }
 
 .terminos-scroll p {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.55;
   color: var(--text-secondary);
   margin-bottom: 0.4rem;
@@ -66,7 +66,7 @@
   padding: 0.75rem 0.9rem;
   cursor: pointer;
   margin-bottom: 1.25rem;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 600;
 }

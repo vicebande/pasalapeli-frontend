@@ -55,6 +55,11 @@
             <span>{{ t.pago.metodo }}</span>
           </div>
         </div>
+
+        <div class="refund-hint" *ngIf="t.estado === 'PAGADO'">
+          <i class="fa-solid fa-clock"></i>
+          <span>Devolución disponible hasta 1 hora antes de la función.</span>
+        </div>
       </div>
 
       <div class="ticket-card-footer">
@@ -101,6 +106,7 @@
       <div class="r-row"><span>Entradas</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
       <div class="r-row"><span>Asientos a liberar</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
       <div class="r-row"><span>Monto reembolsado</span><strong class="text-gold">${{ ticketConfirmacion.pago?.monto | number:'1.0-0' }} CLP</strong></div>
+      <div class="r-row"><span>Plazo de devolución</span><strong>Hasta 1 h antes de la función</strong></div>
     </div>
 
     <p class="refund-warning">

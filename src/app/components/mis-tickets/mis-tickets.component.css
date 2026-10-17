@@ -49,7 +49,7 @@
   font-family: monospace;
   font-weight: 700;
   color: var(--accent-gold);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .ticket-card-body {
@@ -67,7 +67,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
@@ -81,7 +81,7 @@
 .p-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 0.25rem;
 }
@@ -100,7 +100,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
@@ -137,7 +137,7 @@
   color: var(--accent-gold);
   padding: 0.4rem 0.85rem;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
@@ -205,7 +205,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   padding: 0.22rem 0;
 }
@@ -222,7 +222,7 @@
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
   color: #fca5a5;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
   margin-bottom: 1.25rem;
@@ -274,4 +274,24 @@
 .cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Recordatorio de la politica de devolucion (1 hora antes de la funcion) */
+.refund-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 10px;
+  color: #fde68a;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.refund-hint i {
+  color: #fbbf24;
+  flex: 0 0 auto;
 }

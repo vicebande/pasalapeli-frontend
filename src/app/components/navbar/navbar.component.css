@@ -49,7 +49,7 @@
 }
 
 .brand-subtitle {
-  font-size: 0.65rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   color: var(--accent-gold);
@@ -99,7 +99,7 @@
 }
 
 .demo-label {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
@@ -109,7 +109,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -144,7 +144,7 @@
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 

@@ -9,7 +9,8 @@ import { Notificacion } from '../../models/notificacion.model';
 /**
  * Campana de notificaciones con bandeja (inbox) integrada en el navbar.
  * Muestra el contador de no leidas, permite abrir la bandeja y marcar
- * notificaciones como leidas (individual o todas).
+ * notificaciones como leidas (individual o todas). La bandeja se agrupa en
+ * secciones "Nuevas" (las que llegaron sin leer) y "Anteriores".
  */
 @Component({
   selector: 'app-notificaciones',
@@ -29,6 +30,10 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
   public hayMas = false;
   private paginaActual = 0;
   private subs = new Subscription();
+
+  /** Ids que llegaron sin leer en la ultima carga: se pintan como "Nueva"
+   *  aunque la bandeja los marque como leidos al abrir. */
+  private recientesIds = new Set<number>();
 
   constructor(
     private notificationService: NotificationService,
@@ -84,7 +89,10 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     this.paginaActual = 0;
     this.notificationService.getMisNotificaciones(this.paginaActual, NotificacionesComponent.TAMANO_PAGINA).subscribe({
       next: (pagina) => {
-        this.notificaciones = pagina?.content || [];
+        const lista = pagina?.content || [];
+        // Snapshot de las no leidas ANTES del marcado automatico (seccion "Nuevas").
+        this.recientesIds = new Set(lista.filter(n => !n.leida).map(n => n.id));
+        this.notificaciones = lista;
         this.hayMas = this.paginaActual + 1 < (pagina?.totalPages ?? 1);
         this.cargando = false;
         // Al abrir la bandeja se marcan todas como leidas automaticamente.
@@ -152,6 +160,28 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       case 'TICKET_DEVUELTO': return 'fa-rotate-left';
       default: return 'fa-bell';
     }
+  }
+
+  public tipoLabel(n: Notificacion): string {
+    switch (n.tipo) {
+      case 'PELICULA_CREADA': return 'Nueva película';
+      case 'PELICULA_ELIMINADA': return 'Película retirada';
+      case 'TICKET_PAGADO': return 'Compra';
+      case 'TICKET_DEVUELTO': return 'Devolución';
+      default: return 'Aviso';
+    }
+  }
+
+  public esNueva(n: Notificacion): boolean {
+    return this.recientesIds.has(n.id);
+  }
+
+  public get nuevas(): Notificacion[] {
+    return this.notificaciones.filter(n => this.recientesIds.has(n.id));
+  }
+
+  public get anteriores(): Notificacion[] {
+    return this.notificaciones.filter(n => !this.recientesIds.has(n.id));
   }
 
   public marcarTodas(): void {

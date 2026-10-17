@@ -8,10 +8,19 @@
   <div class="notif-backdrop" *ngIf="abierto" (click)="cerrarPanel()"></div>
 
   <div class="notif-panel" *ngIf="abierto">
-    <div class="notif-panel-header">
-      <span class="notif-panel-title"><i class="fa-solid fa-inbox"></i> Notificaciones</span>
+    <!-- Cabecera con degradado -->
+    <div class="notif-hero">
+      <div class="notif-hero-icon">
+        <i class="fa-solid fa-bell"></i>
+      </div>
+      <div class="notif-hero-text">
+        <span class="notif-hero-title">Notificaciones</span>
+        <span class="notif-hero-sub">
+          {{ notificaciones.length === 0 ? 'Bandeja de entrada' : notificaciones.length + ' avisos' }}
+        </span>
+      </div>
       <button class="notif-mark-all" *ngIf="noLeidas > 0" (click)="marcarTodas()">
-        Marcar todas
+        <i class="fa-solid fa-check-double"></i> Marcar todas
       </button>
     </div>
 
@@ -23,26 +32,67 @@
       <div class="notif-empty" *ngIf="!cargando && notificaciones.length === 0">
         <i class="fa-regular fa-bell-slash"></i>
         <p>No tienes notificaciones</p>
+        <span class="notif-empty-sub">Avisos de compras, devoluciones y estrenos aparecerán aquí.</span>
       </div>
 
-        <div class="notif-item"
-           *ngFor="let n of notificaciones; trackBy: trackById"
-           [class.no-leida]="!n.leida"
-           [class.navegable]="esAnuncioPelicula(n)"
-           (click)="abrirNotificacion(n)">
-        <div class="notif-icon" [ngClass]="n.tipo">
-          <i class="fa-solid" [ngClass]="iconoDe(n)"></i>
+      <!-- SECCION: NUEVAS -->
+      <ng-container *ngIf="nuevas.length > 0">
+        <div class="notif-section">
+          <span class="notif-section-title">
+            <span class="section-dot dot-nuevas"></span> Nuevas
+          </span>
+          <span class="notif-section-count">{{ nuevas.length }}</span>
         </div>
-        <div class="notif-body">
-          <div class="notif-item-title">
-            {{ n.titulo }}
-            <span *ngIf="!n.leida" class="notif-dot" title="No leída"></span>
+
+        <div class="notif-card"
+             *ngFor="let n of nuevas; trackBy: trackById"
+             [class.navegable]="esAnuncioPelicula(n)"
+             (click)="abrirNotificacion(n)">
+          <div class="notif-icon" [ngClass]="n.tipo">
+            <i class="fa-solid" [ngClass]="iconoDe(n)"></i>
           </div>
-          <div class="notif-item-msg">{{ n.mensaje }}</div>
-          <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
+          <div class="notif-body">
+            <div class="notif-card-top">
+              <span class="notif-chip" [ngClass]="n.tipo">{{ tipoLabel(n) }}</span>
+              <span class="notif-chip chip-nueva">Nueva</span>
+            </div>
+            <div class="notif-item-title">
+              {{ n.titulo }}
+            </div>
+            <div class="notif-item-msg">{{ n.mensaje }}</div>
+            <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
+          </div>
+          <i class="fa-solid fa-chevron-right notif-go" *ngIf="esAnuncioPelicula(n)"></i>
         </div>
-        <i class="fa-solid fa-chevron-right notif-go" *ngIf="esAnuncioPelicula(n)"></i>
-      </div>
+      </ng-container>
+
+      <!-- SECCION: ANTERIORES -->
+      <ng-container *ngIf="anteriores.length > 0">
+        <div class="notif-section">
+          <span class="notif-section-title">
+            <span class="section-dot dot-anteriores"></span> Anteriores
+          </span>
+          <span class="notif-section-count">{{ anteriores.length }}</span>
+        </div>
+
+        <div class="notif-card"
+             *ngFor="let n of anteriores; trackBy: trackById"
+             [class.navegable]="esAnuncioPelicula(n)"
+             (click)="abrirNotificacion(n)">
+          <div class="notif-icon" [ngClass]="n.tipo">
+            <i class="fa-solid" [ngClass]="iconoDe(n)"></i>
+          </div>
+          <div class="notif-body">
+            <div class="notif-card-top">
+              <span class="notif-chip" [ngClass]="n.tipo">{{ tipoLabel(n) }}</span>
+            </div>
+            <div class="notif-item-title">{{ n.titulo }}</div>
+            <div class="notif-item-msg">{{ n.mensaje }}</div>
+            <div class="notif-item-date">{{ n.fechaCreacion | date:'short' }}</div>
+          </div>
+          <i class="fa-solid fa-chevron-right notif-go" *ngIf="esAnuncioPelicula(n)"></i>
+        </div>
+      </ng-container>
 
       <button class="notif-load-more"
               *ngIf="hayMas"
@@ -51,6 +101,11 @@
         <i class="fa-solid" [ngClass]="cargandoMas ? 'fa-spinner fa-spin' : 'fa-chevron-down'"></i>
         {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
       </button>
+    </div>
+
+    <div class="notif-panel-footer">
+      <i class="fa-solid fa-lock"></i>
+      <span>Solo tú puedes ver esta bandeja</span>
     </div>
   </div>
 </div>

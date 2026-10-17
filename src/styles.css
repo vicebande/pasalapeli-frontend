@@ -1,6 +1,11 @@
 /* ==========================================================
-   PASA LA PELI - ESTILOS GLOBALES DE DISEÑO CINEMATOGRÁFICO
+   PASA LA PELI - ESTILOS GLOBALES DE DISEÑO CINEMATOGRAFICO
    ========================================================== */
+
+/* Base de tipografia: rem grande para mejorar legibilidad (18px). */
+html {
+  font-size: 18px;
+}
 
 :root {
   --bg-main: #0a0e17;
@@ -101,7 +106,7 @@ button {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .btn-outline:hover {
@@ -113,7 +118,7 @@ button {
   display: inline-block;
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -179,7 +184,7 @@ button {
 
 .form-label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
