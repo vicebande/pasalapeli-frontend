@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TicketService } from '../../services/ticket.service';
 import { AuthService } from '../../services/auth.service';
 import { Ticket } from '../../models/ticket.model';
@@ -14,6 +13,10 @@ import { Ticket } from '../../models/ticket.model';
   styleUrls: ['./mis-tickets.component.css']
 })
 export class MisTicketsComponent implements OnInit {
+  public readonly QR_N = 25;
+  public readonly QR_QUIET = 2;
+  public readonly QR_TOTAL = this.QR_N + this.QR_QUIET * 2;
+
   public tickets: Ticket[] = [];
   public cargando: boolean = true;
   public error: string | null = null;
@@ -21,11 +24,11 @@ export class MisTicketsComponent implements OnInit {
   public devolviendoId: number | null = null;
   public ticketConfirmacion: Ticket | null = null;
   public ticketParaEscanear: Ticket | null = null;
+  public qrCeldas: { x: number; y: number }[] = [];
 
   constructor(
     private ticketService: TicketService,
-    public authService: AuthService,
-    private sanitizer: DomSanitizer
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -81,32 +84,25 @@ export class MisTicketsComponent implements OnInit {
 
   public abrirModal(t: Ticket): void {
     this.ticketParaEscanear = t;
+    this.qrCeldas = this.calcularCeldas(t.codigo);
   }
 
   public cerrarModal(): void {
     this.ticketParaEscanear = null;
+    this.qrCeldas = [];
   }
 
   /**
-   * QR pseudo-gráfico determinista a partir del código del ticket (sin
-   * dependencias): mismo código => misma matriz. Solo decorativo/escaneable
-   * como imagen, la validación real la hace Ticket Service por código.
+   * Matriz de celdas encendidas del QR pseudo-gráfico determinista a partir
+   * del código del ticket (sin dependencias): mismo código => misma matriz.
+   * Se renderiza como <svg> nativo en el template (sin [innerHTML] ni
+   * bypass del sanitizer de Angular). Solo decorativo: la validación real la
+   * hace Ticket Service por código.
    */
-  public qrSvg(codigo: string): SafeHtml {
-    const n = 25;
-    const quiet = 2;
-    const total = n + quiet * 2;
-    const rects = this.celdasQr(codigo, n);
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" role="img" aria-label="Código ${codigo}">` +
-      `<rect width="${total}" height="${total}" fill="#ffffff"/><g fill="#111111">${rects}</g></svg>`;
-    return this.sanitizer.bypassSecurityTrustHtml(svg);
-  }
-
-  private celdasQr(codigo: string, n: number): string {
+  private calcularCeldas(codigo: string): { x: number; y: number }[] {
+    const n = this.QR_N;
     const siguiente = this.creadorAleatorio(this.fnv1a(codigo));
-    const quiet = 2;
-    let rects = '';
+    const celdas: { x: number; y: number }[] = [];
     for (let y = 0; y < n; y++) {
       for (let x = 0; x < n; x++) {
         let on = false;
@@ -118,11 +114,11 @@ export class MisTicketsComponent implements OnInit {
           on = siguiente() < 0.47;
         }
         if (on) {
-          rects += `<rect x="${x + quiet}" y="${y + quiet}" width="1" height="1"/>`;
+          celdas.push({ x, y });
         }
       }
     }
-    return rects;
+    return celdas;
   }
 
   private fnv1a(texto: string): number {

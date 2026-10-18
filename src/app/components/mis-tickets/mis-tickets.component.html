@@ -176,7 +176,16 @@
       </div>
     </div>
 
-    <div class="tqm-qr" [innerHTML]="qrSvg(ticketParaEscanear.codigo)"></div>
+    <div class="tqm-qr">
+      <svg [attr.viewBox]="'0 0 ' + QR_TOTAL + ' ' + QR_TOTAL" shape-rendering="crispEdges" role="img"
+           [attr.aria-label]="'Código QR de la entrada ' + ticketParaEscanear.codigo">
+        <rect [attr.width]="QR_TOTAL" [attr.height]="QR_TOTAL" fill="#ffffff"></rect>
+        <g fill="#111111">
+          <rect *ngFor="let c of qrCeldas" [attr.x]="c.x + QR_QUIET" [attr.y]="c.y + QR_QUIET"
+                width="1" height="1"></rect>
+        </g>
+      </svg>
+    </div>
 
     <p class="tqm-caption">
       <i class="fa-solid fa-circle-info"></i>
