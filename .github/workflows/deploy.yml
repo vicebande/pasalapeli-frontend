@@ -100,6 +100,9 @@ jobs:
             done
             if [ "$STATUS" != "healthy" ]; then
               echo "ERROR: $SERVICE no quedo healthy tras 150s" >&2
+              echo "==> docker logs (depuracion):" >&2
+              docker logs pasalapeli-frontend 2>&1 | tail -50 >&2 || true
+              docker inspect pasalapeli-frontend --format '{{json .State.Health}}' >&2 || true
               exit 1
             fi
 
