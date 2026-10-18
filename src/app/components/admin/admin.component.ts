@@ -64,7 +64,8 @@ export class AdminComponent implements OnInit {
 
   public cargarPeliculas(): void {
     this.cargando = true;
-    this.carteleraService.getPeliculas().subscribe({
+    // todas=true: el admin ve tambien las peliculas sin funciones proximas (el catalogo publico las oculta)
+    this.carteleraService.getPeliculas(undefined, true).subscribe({
       next: (data) => {
         this.peliculas = data;
         this.funcionesPorPelicula = {};

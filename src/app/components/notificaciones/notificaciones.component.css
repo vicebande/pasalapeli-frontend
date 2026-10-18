@@ -19,11 +19,7 @@
   transition: all 0.2s ease;
 }
 
-.notif-bell:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-red);
-}
-
+.notif-bell:hover,
 .notif-bell.activa {
   background: var(--bg-card-hover);
   border-color: var(--accent-red);
@@ -35,7 +31,7 @@
   right: -6px;
   background: var(--accent-red);
   color: #fff;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   min-width: 20px;
   height: 20px;
@@ -127,7 +123,6 @@
 }
 
 .notif-mark-all:hover {
-  text-decoration: none;
   background: rgba(56, 189, 248, 0.16);
 }
 
@@ -168,9 +163,7 @@
 }
 
 .notif-empty p {
-  margin: 0;
   font-weight: 700;
-  font-size: 1rem;
   color: var(--text-primary);
 }
 
@@ -203,7 +196,6 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  display: inline-block;
 }
 
 .dot-nuevas {
@@ -215,7 +207,7 @@
 }
 
 .notif-section-count {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
   background: var(--bg-card-hover);
@@ -263,6 +255,7 @@
 .notif-icon.PELICULA_ELIMINADA { background: linear-gradient(135deg, #ef4444, #991b1b); }
 .notif-icon.TICKET_PAGADO { background: linear-gradient(135deg, #10b981, #047857); }
 .notif-icon.TICKET_DEVUELTO { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.notif-icon.ANUNCIO { background: linear-gradient(135deg, #a78bfa, #6d28d9); }
 
 .notif-body {
   flex: 1;
@@ -278,9 +271,8 @@
 }
 
 .notif-chip {
-  font-size: 11px;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
   padding: 0.14rem 0.5rem;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -309,6 +301,12 @@
   color: #fcd34d;
   background: rgba(245, 158, 11, 0.14);
   border-color: rgba(245, 158, 11, 0.4);
+}
+
+.notif-chip.ANUNCIO {
+  color: #d8b4fe;
+  background: rgba(167, 139, 250, 0.14);
+  border-color: rgba(167, 139, 250, 0.4);
 }
 
 .notif-chip.chip-nueva {
@@ -343,7 +341,7 @@
 }
 
 .notif-item-date {
-  font-size: 11px;
+  font-size: 0.7rem;
   color: var(--text-muted);
   margin-top: 0.45rem;
 }
@@ -352,12 +350,11 @@
   align-self: center;
   color: var(--text-muted);
   font-size: 0.9rem;
-  transition: color 0.15s ease, transform 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 .notif-card.navegable:hover .notif-go {
   color: var(--accent-blue);
-  transform: translateX(2px);
 }
 
 .notif-load-more {
@@ -365,19 +362,18 @@
   width: calc(100% - 1.7rem);
   margin: 0.6rem 0.85rem 0.4rem;
   padding: 0.6rem;
-  border: 1px dashed var(--border-color, #444);
+  border: 1px dashed var(--border-color);
   border-radius: 10px;
   background: transparent;
-  color: var(--text-secondary, #bbb);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 600;
-  cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .notif-load-more:hover:not(:disabled) {
-  color: var(--text-primary, #eee);
-  border-color: var(--text-secondary, #999);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
 }
 
 .notif-load-more:disabled {
@@ -394,5 +390,5 @@
   border-top: 1px solid var(--border-color);
   background: var(--bg-elevated);
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 0.7rem;
 }

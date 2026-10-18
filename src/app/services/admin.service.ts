@@ -105,4 +105,10 @@ export class AdminService {
       headers: this.getHeaders()
     });
   }
+
+  public crearAnuncio(titulo: string, mensaje: string): Observable<{ enviados: number }> {
+    return this.http.post<{ enviados: number }>(`${this.apiUrl}/anuncios`, { titulo, mensaje }, {
+      headers: this.getHeaders()
+    });
+  }
 }

@@ -69,6 +69,7 @@ button {
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.95rem;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -89,6 +90,7 @@ button {
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.95rem;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -122,6 +124,7 @@ button {
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .badge-red {

@@ -95,3 +95,12 @@
   <div class="spinner"></div>
   <p>Cargando información de la función...</p>
 </div>
+
+<!-- Error / película no disponible (ej. acceso directo a /pelicula/:id) -->
+<div *ngIf="!cargando && !pelicula && error" class="detalle-error">
+  <i class="fa-solid fa-film"></i>
+  <p>{{ error }}</p>
+  <a routerLink="/cartelera" class="btn-primary">
+    <i class="fa-solid fa-arrow-left"></i> Volver a la Cartelera
+  </a>
+</div>

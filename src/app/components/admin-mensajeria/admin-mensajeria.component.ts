@@ -20,7 +20,7 @@ export class AdminMensajeriaComponent implements OnInit {
   public reglas: ReglaDistribucion[] = [];
   public mensajesFallidos: MensajeFallido[] = [];
 
-  public readonly eventos = ['PELICULA_CREADA', 'PELICULA_ELIMINADA', 'TICKET_PAGADO', 'TICKET_DEVUELTO'];
+  public readonly eventos = ['PELICULA_CREADA', 'PELICULA_ELIMINADA', 'TICKET_PAGADO', 'TICKET_DEVUELTO', 'ANUNCIO'];
   public readonly tiposDestino = ['TODOS', 'ROL', 'USUARIO', 'USUARIO_EVENTO'];
 
   public nuevoDestino: Partial<DestinoNotificacion> = {
@@ -32,6 +32,10 @@ export class AdminMensajeriaComponent implements OnInit {
 
   public mensajeExito: string | null = null;
   public mensajeError: string | null = null;
+
+  public anuncioTitulo: string = '';
+  public anuncioMensaje: string = '';
+  public enviandoAnuncio: boolean = false;
 
   constructor(private adminService: AdminService) {}
 
@@ -126,6 +130,34 @@ export class AdminMensajeriaComponent implements OnInit {
         this.cargarReglas();
       },
       error: () => this.mensajeError = 'Error al eliminar la regla.'
+    });
+  }
+
+  public crearAnuncio(): void {
+    this.mensajeExito = null;
+    this.mensajeError = null;
+    const titulo = this.anuncioTitulo.trim();
+    const mensaje = this.anuncioMensaje.trim();
+    if (!titulo || !mensaje) {
+      this.mensajeError = 'Ingrese un título y un mensaje para el anuncio.';
+      return;
+    }
+    if (titulo.length > 150 || mensaje.length > 500) {
+      this.mensajeError = 'El título admite hasta 150 caracteres y el mensaje hasta 500.';
+      return;
+    }
+    this.enviandoAnuncio = true;
+    this.adminService.crearAnuncio(titulo, mensaje).subscribe({
+      next: (r) => {
+        this.enviandoAnuncio = false;
+        this.anuncioTitulo = '';
+        this.anuncioMensaje = '';
+        this.mensajeExito = `Anuncio enviado a ${r?.enviados ?? 0} usuario(s).`;
+      },
+      error: (err) => {
+        this.enviandoAnuncio = false;
+        this.mensajeError = err.error?.message || 'Error al enviar el anuncio.';
+      }
     });
   }
 }

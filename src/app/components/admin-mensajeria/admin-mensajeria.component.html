@@ -82,6 +82,29 @@
     </div>
   </div>
 
+  <!-- Anuncio manual a todos los usuarios -->
+  <div class="msg-card msg-full">
+    <h4><i class="fa-solid fa-bullhorn text-red"></i> Anuncio a todos los usuarios</h4>
+    <p class="msg-anuncio-hint">
+      Envía una notificación manual a los usuarios registrados (evento
+      <span class="chip chip-event">ANUNCIO</span> si existe una regla de distribución).
+    </p>
+    <form class="msg-form anuncio-form" (ngSubmit)="crearAnuncio()">
+      <input class="msg-input" type="text" [(ngModel)]="anuncioTitulo" name="anuncioTitulo"
+             maxlength="150" placeholder="Título del anuncio (máx. 150)" aria-label="Título del anuncio" />
+      <textarea class="msg-input msg-textarea" [(ngModel)]="anuncioMensaje" name="anuncioMensaje"
+                maxlength="500" rows="3" placeholder="Mensaje del anuncio (máx. 500 caracteres)"
+                aria-label="Mensaje del anuncio"></textarea>
+      <div class="anuncio-footer">
+        <span class="anuncio-contador">{{ anuncioMensaje.length }}/500</span>
+        <button class="btn-add" type="submit" [disabled]="enviandoAnuncio">
+          <i class="fa-solid" [ngClass]="enviandoAnuncio ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+          {{ enviandoAnuncio ? 'Enviando...' : 'Enviar anuncio' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
   <!-- Mensajes fallidos -->
   <div class="msg-card msg-full">
     <h4><i class="fa-solid fa-triangle-exclamation text-gold"></i> Mensajes fallidos (Dead-Letter Queue)</h4>

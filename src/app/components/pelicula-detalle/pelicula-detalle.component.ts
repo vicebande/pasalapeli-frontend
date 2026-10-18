@@ -41,8 +41,10 @@ export class PeliculaDetalleComponent implements OnInit {
         this.pelicula = data;
         this.cargarFunciones(id);
       },
-      error: () => {
-        this.error = 'No fue posible cargar el detalle de la película.';
+      error: (err) => {
+        this.error = err?.status === 404
+          ? 'Esta película ya no está disponible en la cartelera.'
+          : 'No fue posible cargar el detalle de la película.';
         this.cargando = false;
       }
     });

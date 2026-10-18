@@ -13,10 +13,13 @@ export class CarteleraService {
 
   constructor(private http: HttpClient) {}
 
-  public getPeliculas(busqueda?: string): Observable<Pelicula[]> {
+  public getPeliculas(busqueda?: string, todas?: boolean): Observable<Pelicula[]> {
     let params = new HttpParams();
     if (busqueda) {
       params = params.set('busqueda', busqueda);
+    }
+    if (todas) {
+      params = params.set('todas', 'true');
     }
     return this.http.get<Pelicula[]>(this.apiUrl, { params });
   }

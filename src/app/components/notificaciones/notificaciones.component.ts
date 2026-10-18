@@ -158,6 +158,7 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       case 'PELICULA_ELIMINADA': return 'fa-ban';
       case 'TICKET_PAGADO': return 'fa-circle-check';
       case 'TICKET_DEVUELTO': return 'fa-rotate-left';
+      case 'ANUNCIO': return 'fa-bullhorn';
       default: return 'fa-bell';
     }
   }
@@ -168,6 +169,7 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       case 'PELICULA_ELIMINADA': return 'Película retirada';
       case 'TICKET_PAGADO': return 'Compra';
       case 'TICKET_DEVUELTO': return 'Devolución';
+      case 'ANUNCIO': return 'Anuncio';
       default: return 'Aviso';
     }
   }

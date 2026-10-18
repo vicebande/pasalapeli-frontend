@@ -42,6 +42,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -50,6 +52,7 @@
   font-weight: 700;
   color: var(--accent-gold);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .ticket-card-body {
@@ -294,4 +297,108 @@
 .refund-hint i {
   color: #fbbf24;
   flex: 0 0 auto;
+}
+
+.ticket-card {
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ticket-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(229, 9, 20, 0.45);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.ticket-qr-modal {
+  position: relative;
+  text-align: center;
+  max-width: 460px;
+}
+
+.qr-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.9rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+}
+
+.qr-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tqm-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tqm-title {
+  font-size: 1.3rem;
+  margin: 0 0 1rem;
+}
+
+.tqm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+  text-align: left;
+}
+
+.tqm-cell {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
+.tqm-cell span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.15rem;
+}
+
+.tqm-cell strong {
+  font-size: 0.95rem;
+}
+
+.tqm-qr {
+  display: flex;
+  justify-content: center;
+  padding: 0.9rem;
+  background: #ffffff;
+  border-radius: 14px;
+  max-width: 260px;
+  margin: 0 auto;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.tqm-qr svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.tqm-caption {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.tqm-caption i {
+  margin-right: 0.3rem;
 }

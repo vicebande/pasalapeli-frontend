@@ -17,6 +17,8 @@ export interface Ticket {
   funcionId: number;
   peliculaTitulo?: string;
   sala?: string;
+  fechaFuncion?: string;
+  horaFuncion?: string;
   cantidad?: number;
   pago?: Pago;
 }

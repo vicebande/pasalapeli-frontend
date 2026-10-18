@@ -29,7 +29,7 @@
 
   <!-- Tickets Grid -->
   <div *ngIf="!cargando && tickets.length > 0" class="tickets-grid">
-    <div *ngFor="let t of tickets" class="ticket-card">
+    <div *ngFor="let t of tickets" class="ticket-card" (click)="abrirModal(t)">
       <div class="ticket-card-header">
         <span class="ticket-code-tag"><i class="fa-solid fa-hashtag"></i> {{ t.codigo }}</span>
         <span class="badge" [ngClass]="t.estado === 'PAGADO' ? 'badge-green' : 'badge-gold'">
@@ -41,6 +41,11 @@
         <h3 class="ticket-movie">{{ t.peliculaTitulo || 'Función de Cine' }}</h3>
         <div class="ticket-meta">
           <span><i class="fa-solid fa-desktop"></i> {{ t.sala || 'Sala Asignada' }}</span>
+          <span *ngIf="t.fechaFuncion">
+            <i class="fa-regular fa-calendar-days"></i>
+            Función: {{ t.fechaFuncion | date:'dd/MM/yyyy' }}
+            {{ t.horaFuncion ? (t.horaFuncion | slice:0:5) : '' }}
+          </span>
           <span><i class="fa-regular fa-clock"></i> {{ t.fechaCompra | date:'medium' }}</span>
           <span><i class="fa-solid fa-ticket"></i> {{ t.cantidad ?? 1 }} entrada(s)</span>
         </div>
@@ -65,11 +70,11 @@
       <div class="ticket-card-footer">
         <div class="qr-preview">
           <i class="fa-solid fa-qrcode"></i>
-          <span>Válido para ingreso a sala</span>
+          <span>Ver entrada con QR</span>
         </div>
         <button
           *ngIf="t.estado === 'PAGADO'"
-          (click)="solicitarDevolucion(t)"
+          (click)="$event.stopPropagation(); solicitarDevolucion(t)"
           [disabled]="devolviendoId === t.id"
           class="btn-refund"
           title="Simular devolución del ticket">
@@ -103,6 +108,13 @@
 
     <div class="refund-info">
       <div class="r-row"><span>Película</span><strong>{{ ticketConfirmacion.peliculaTitulo }}</strong></div>
+      <div class="r-row" *ngIf="ticketConfirmacion.fechaFuncion">
+        <span>Función</span>
+        <strong>
+          {{ ticketConfirmacion.fechaFuncion | date:'dd/MM/yyyy' }}
+          {{ ticketConfirmacion.horaFuncion ? (ticketConfirmacion.horaFuncion | slice:0:5) : '' }}
+        </strong>
+      </div>
       <div class="r-row"><span>Entradas</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
       <div class="r-row"><span>Asientos a liberar</span><strong>{{ ticketConfirmacion.cantidad ?? 1 }}</strong></div>
       <div class="r-row"><span>Monto reembolsado</span><strong class="text-gold">${{ ticketConfirmacion.pago?.monto | number:'1.0-0' }} CLP</strong></div>
@@ -123,5 +135,52 @@
         {{ devolviendoId === ticketConfirmacion.id ? 'Devolviendo...' : 'Sí, Devolver Ticket' }}
       </button>
     </div>
+  </div>
+</div>
+
+<!-- Modal: entrada con QR -->
+<div *ngIf="ticketParaEscanear" class="modal-backdrop" (click)="cerrarModal()">
+  <div class="modal-content ticket-qr-modal" (click)="$event.stopPropagation()">
+    <button class="qr-close" (click)="cerrarModal()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="tqm-top">
+      <span class="ticket-code-tag"><i class="fa-solid fa-hashtag"></i> {{ ticketParaEscanear.codigo }}</span>
+      <span class="badge" [ngClass]="ticketParaEscanear.estado === 'PAGADO' ? 'badge-green' : 'badge-gold'">
+        {{ ticketParaEscanear.estado }}
+      </span>
+    </div>
+
+    <h2 class="tqm-title">{{ ticketParaEscanear.peliculaTitulo || 'Función de Cine' }}</h2>
+
+    <div class="tqm-grid">
+      <div class="tqm-cell">
+        <span>Sala</span>
+        <strong>{{ ticketParaEscanear.sala || 'Sala Asignada' }}</strong>
+      </div>
+      <div class="tqm-cell">
+        <span>Entradas</span>
+        <strong>{{ ticketParaEscanear.cantidad ?? 1 }}</strong>
+      </div>
+      <div class="tqm-cell" *ngIf="ticketParaEscanear.fechaFuncion">
+        <span>Función</span>
+        <strong>
+          {{ ticketParaEscanear.fechaFuncion | date:'dd/MM/yyyy' }}
+          {{ ticketParaEscanear.horaFuncion ? (ticketParaEscanear.horaFuncion | slice:0:5) : '' }}
+        </strong>
+      </div>
+      <div class="tqm-cell" *ngIf="ticketParaEscanear.pago">
+        <span>Total pagado</span>
+        <strong class="text-gold">${{ ticketParaEscanear.pago.monto | number:'1.0-0' }} CLP</strong>
+      </div>
+    </div>
+
+    <div class="tqm-qr" [innerHTML]="qrSvg(ticketParaEscanear.codigo)"></div>
+
+    <p class="tqm-caption">
+      <i class="fa-solid fa-circle-info"></i>
+      Presenta este código al ingresar a la sala. La validación real se realiza por código en puerta.
+    </p>
   </div>
 </div>
