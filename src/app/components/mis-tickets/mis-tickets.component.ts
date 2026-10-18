@@ -96,48 +96,66 @@ export class MisTicketsComponent implements OnInit {
     const n = 25;
     const quiet = 2;
     const total = n + quiet * 2;
+    const rects = this.celdasQr(codigo, n);
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" role="img" aria-label="Código ${codigo}">` +
+      `<rect width="${total}" height="${total}" fill="#ffffff"/><g fill="#111111">${rects}</g></svg>`;
+    return this.sanitizer.bypassSecurityTrustHtml(svg);
+  }
 
-    let h = 2166136261;
-    for (let i = 0; i < codigo.length; i++) {
-      h ^= codigo.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    let s = (h >>> 0) || 1;
-    const rand = (): number => {
-      s ^= s << 13;
-      s ^= s >>> 17;
-      s ^= s << 5;
-      s >>>= 0;
-      return s / 4294967296;
-    };
-
-    const inFinder = (x: number, y: number): boolean =>
-      (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
-
+  private celdasQr(codigo: string, n: number): string {
+    const siguiente = this.creadorAleatorio(this.fnv1a(codigo));
+    const quiet = 2;
     let rects = '';
     for (let y = 0; y < n; y++) {
       for (let x = 0; x < n; x++) {
         let on = false;
-        if (inFinder(x, y)) {
-          const fx = x >= n - 7 ? x - (n - 7) : x;
-          const fy = y >= n - 7 ? y - (n - 7) : y;
-          const ring = fx === 0 || fx === 6 || fy === 0 || fy === 6;
-          const center = fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4;
-          on = ring || center;
+        if (this.esFinder(x, y, n)) {
+          on = this.moduloFinder(x - this.origenFinder(x, n), y - this.origenFinder(y, n));
         } else if (x === 6 || y === 6) {
           on = (x + y) % 2 === 0;
         } else {
-          on = rand() < 0.47;
+          on = siguiente() < 0.47;
         }
         if (on) {
           rects += `<rect x="${x + quiet}" y="${y + quiet}" width="1" height="1"/>`;
         }
       }
     }
+    return rects;
+  }
 
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" role="img" aria-label="Código ${codigo}">` +
-      `<rect width="${total}" height="${total}" fill="#ffffff"/><g fill="#111111">${rects}</g></svg>`;
-    return this.sanitizer.bypassSecurityTrustHtml(svg);
+  private fnv1a(texto: string): number {
+    let h = 2166136261;
+    for (let i = 0; i < texto.length; i++) {
+      h ^= texto.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0 || 1;
+  }
+
+  private creadorAleatorio(seed: number): () => number {
+    let s = seed;
+    return () => {
+      s ^= s << 13;
+      s ^= s >>> 17;
+      s ^= s << 5;
+      s >>>= 0;
+      return s / 4294967296;
+    };
+  }
+
+  private origenFinder(v: number, n: number): number {
+    return v >= n - 7 ? n - 7 : 0;
+  }
+
+  private esFinder(x: number, y: number, n: number): boolean {
+    return (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+  }
+
+  private moduloFinder(fx: number, fy: number): boolean {
+    const anillo = fx === 0 || fx === 6 || fy === 0 || fy === 6;
+    const centro = fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4;
+    return anillo || centro;
   }
 }
