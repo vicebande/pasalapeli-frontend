@@ -1,8 +1,8 @@
 <header class="navbar-header">
   <div class="container navbar-container">
     <!-- Logo -->
-    <a routerLink="/cartelera" class="navbar-brand">
-      <div class="brand-icon">
+    <a routerLink="/cartelera" class="navbar-brand" (click)="cerrarMenu()">
+      <div class="brand-icon" aria-hidden="true">
         <i class="fa-solid fa-film"></i>
       </div>
       <div class="brand-text">
@@ -11,52 +11,65 @@
       </div>
     </a>
 
-    <!-- Navigation links -->
-    <nav class="navbar-nav">
-      <a routerLink="/cartelera" routerLinkActive="active" class="nav-link">
-        <i class="fa-solid fa-clapperboard"></i> Cartelera
-      </a>
-      <a *ngIf="authService.isAuthenticated()" routerLink="/mis-tickets" routerLinkActive="active" class="nav-link">
-        <i class="fa-solid fa-ticket"></i> Mis Tickets
-      </a>
-      <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin">
-        <i class="fa-solid fa-shield-halved"></i> Panel Admin
-      </a>
-    </nav>
+    <!-- Botón hamburguesa (móvil) -->
+    <button
+      type="button"
+      class="btn-hamburger"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuAbierto"
+      aria-controls="navbar-menu"
+      aria-label="Abrir o cerrar menú de navegación">
+      <i class="fa-solid" [ngClass]="menuAbierto ? 'fa-xmark' : 'fa-bars'" aria-hidden="true"></i>
+    </button>
 
-    <!-- Auth & User Actions -->
-    <div class="navbar-actions">
-      <!-- Campana de notificaciones (bandeja + contador de no leidas) -->
-      <app-notificaciones></app-notificaciones>
+    <div id="navbar-menu" class="navbar-menu" [class.menu-open]="menuAbierto">
+      <!-- Navigation links -->
+      <nav class="navbar-nav" aria-label="Navegación principal">
+        <a routerLink="/cartelera" routerLinkActive="active" class="nav-link" (click)="cerrarMenu()">
+          <i class="fa-solid fa-clapperboard" aria-hidden="true"></i> Cartelera
+        </a>
+        <a *ngIf="authService.isAuthenticated()" routerLink="/mis-tickets" routerLinkActive="active" class="nav-link" (click)="cerrarMenu()">
+          <i class="fa-solid fa-ticket" aria-hidden="true"></i> Mis Tickets
+        </a>
+        <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin" (click)="cerrarMenu()">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Panel Admin
+        </a>
+      </nav>
 
-      <!-- Demo role switcher for testing rubric -->
-      <div *ngIf="!isAzureEnabled" class="demo-switch-box">
-        <span class="demo-label">Modo Prueba:</span>
-        <button (click)="toggleRole()" class="btn-demo-toggle" [title]="'Cambiar a ' + (authService.isAdmin() ? 'Cliente' : 'Admin')">
-          <i class="fa-solid" [ngClass]="authService.isAdmin() ? 'fa-user-tie text-gold' : 'fa-user text-blue'"></i>
-          <span>{{ authService.isAdmin() ? 'ADMIN' : 'CLIENTE' }}</span>
+      <!-- Auth & User Actions -->
+      <div class="navbar-actions">
+        <!-- Campana de notificaciones (bandeja + contador de no leidas) -->
+        <app-notificaciones></app-notificaciones>
+
+        <!-- Demo role switcher for testing rubric -->
+        <div *ngIf="!isAzureEnabled" class="demo-switch-box">
+          <span class="demo-label">Modo Prueba:</span>
+          <button type="button" (click)="toggleRole()" class="btn-demo-toggle" [title]="'Cambiar a ' + (authService.isAdmin() ? 'Cliente' : 'Admin')">
+            <i class="fa-solid" [ngClass]="authService.isAdmin() ? 'fa-user-tie text-gold' : 'fa-user text-blue'" aria-hidden="true"></i>
+            <span>{{ authService.isAdmin() ? 'ADMIN' : 'CLIENTE' }}</span>
+          </button>
+        </div>
+
+        <!-- User status -->
+        <div *ngIf="currentUser" class="user-profile-badge">
+          <div class="user-avatar" aria-hidden="true">
+            <i class="fa-solid fa-circle-user"></i>
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-role badge" [ngClass]="authService.isAdmin() ? 'badge-gold' : 'badge-blue'">
+              {{ authService.isAdmin() ? 'Admin' : 'Cliente' }}
+            </span>
+          </div>
+          <button type="button" (click)="logout()" class="btn-logout" title="Cerrar Sesión" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <button *ngIf="!currentUser" type="button" (click)="login()" class="btn-primary">
+          <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Iniciar Sesión
         </button>
       </div>
-
-      <!-- User status -->
-      <div *ngIf="currentUser" class="user-profile-badge">
-        <div class="user-avatar">
-          <i class="fa-solid fa-circle-user"></i>
-        </div>
-        <div class="user-info">
-          <span class="user-name">{{ currentUser.name }}</span>
-          <span class="user-role badge" [ngClass]="authService.isAdmin() ? 'badge-gold' : 'badge-blue'">
-            {{ authService.isAdmin() ? 'Admin' : 'Cliente' }}
-          </span>
-        </div>
-        <button (click)="logout()" class="btn-logout" title="Cerrar Sesión">
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </button>
-      </div>
-
-      <button *ngIf="!currentUser" (click)="login()" class="btn-primary">
-        <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
-      </button>
     </div>
   </div>
 </header>

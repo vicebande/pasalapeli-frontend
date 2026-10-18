@@ -16,7 +16,7 @@ export class AdminGuard implements CanActivate {
     if (user?.roles.includes('ROLE_ADMIN')) {
       return true;
     }
-    alert('Acceso restringido: Se requiere rol de Administrador.');
+    // Sin alert() nativo: redirige a cartelera; la proteccion real es el backend.
     return this.router.parseUrl('/cartelera');
   }
 }

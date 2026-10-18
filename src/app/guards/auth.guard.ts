@@ -11,11 +11,12 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  async canActivate(): Promise<boolean | UrlTree> {
+  async canActivate(route: import('@angular/router').ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
     const user = await this.authService.waitForAuthReady();
     if (user?.authenticated) {
       return true;
     }
-    return this.router.parseUrl('/cartelera');
+    const returnUrl = route.url.map(s => s.path).join('/');
+    return this.router.parseUrl(returnUrl ? `/cartelera` : '/cartelera');
   }
 }

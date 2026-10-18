@@ -38,6 +38,20 @@ export class AdminService {
     });
   }
 
+  public actualizarPelicula(id: number, datos: PeliculaRequest, imagenFile?: File): Observable<Pelicula> {
+    if (imagenFile) {
+      const formData = new FormData();
+      formData.append('datos', JSON.stringify(datos));
+      formData.append('imagen', imagenFile, imagenFile.name);
+      return this.http.put<Pelicula>(`${this.apiUrl}/movies/${id}`, formData, {
+        headers: this.getHeaders()
+      });
+    }
+    return this.http.put<Pelicula>(`${this.apiUrl}/movies/${id}`, datos, {
+      headers: this.getHeaders()
+    });
+  }
+
   public eliminarPelicula(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/movies/${id}`, {
       headers: this.getHeaders()

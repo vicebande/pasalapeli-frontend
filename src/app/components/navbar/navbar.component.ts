@@ -7,6 +7,8 @@ import { environment } from '../../../environments/environment';
 import { TerminosComponent } from '../terminos/terminos.component';
 import { NotificacionesComponent } from '../notificaciones/notificaciones.component';
 
+const TERMINOS_ACEPTADOS_KEY = 'plp_terminos_aceptados';
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -18,6 +20,7 @@ export class NavbarComponent implements OnInit {
   public currentUser: UserProfile | null = null;
   public isAzureEnabled = environment.azureAd.enabled;
   public mostrarTerminos = false;
+  public menuAbierto = false;
 
   constructor(public authService: AuthService) {}
 
@@ -27,12 +30,26 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  public toggleMenu(): void {
+    this.menuAbierto = !this.menuAbierto;
+  }
+
+  public cerrarMenu(): void {
+    this.menuAbierto = false;
+  }
+
   public login(): void {
+    // Si ya aceptó los términos una vez, no se vuelve a mostrar el modal.
+    if (localStorage.getItem(TERMINOS_ACEPTADOS_KEY) === 'true') {
+      this.authService.login();
+      return;
+    }
     this.mostrarTerminos = true;
   }
 
   public aceptarTerminos(): void {
     this.mostrarTerminos = false;
+    localStorage.setItem(TERMINOS_ACEPTADOS_KEY, 'true');
     this.authService.login();
   }
 

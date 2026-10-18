@@ -37,6 +37,9 @@ export class AdminMensajeriaComponent implements OnInit {
   public anuncioMensaje: string = '';
   public enviandoAnuncio: boolean = false;
 
+  public destinoAEliminar: DestinoNotificacion | null = null;
+  public reglaAEliminar: ReglaDistribucion | null = null;
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit(): void {
@@ -66,7 +69,11 @@ export class AdminMensajeriaComponent implements OnInit {
   public cargarMensajesFallidos(): void {
     this.adminService.getMensajesFallidos().subscribe({
       next: (m) => this.mensajesFallidos = m || [],
-      error: () => { /* silencioso */ }
+      // Antes el error era silencioso (?? vacío): ahora se reporta al admin.
+      error: () => {
+        this.mensajesFallidos = [];
+        this.mensajeError = 'No se pudieron cargar los mensajes fallidos (Dead-Letter Queue).';
+      }
     });
   }
 
@@ -77,8 +84,8 @@ export class AdminMensajeriaComponent implements OnInit {
   public crearDestino(): void {
     this.mensajeExito = null;
     this.mensajeError = null;
-    if (!this.nuevoDestino.nombre) {
-      alert('Ingrese el nombre del destino.');
+    if (!this.nuevoDestino.nombre?.trim()) {
+      this.mensajeError = 'Ingrese el nombre del destino.';
       return;
     }
     this.adminService.crearDestino({ ...this.nuevoDestino }).subscribe({
@@ -91,8 +98,18 @@ export class AdminMensajeriaComponent implements OnInit {
     });
   }
 
-  public eliminarDestino(d: DestinoNotificacion): void {
-    if (!confirm(`¿Eliminar el destino "${d.nombre}" y sus reglas asociadas?`)) return;
+  public solicitarEliminarDestino(d: DestinoNotificacion): void {
+    this.destinoAEliminar = d;
+  }
+
+  public cancelarEliminarDestino(): void {
+    this.destinoAEliminar = null;
+  }
+
+  public confirmarEliminarDestino(): void {
+    const d = this.destinoAEliminar;
+    this.destinoAEliminar = null;
+    if (!d) return;
     this.adminService.eliminarDestino(d.id).subscribe({
       next: () => {
         this.mensajeExito = `Destino "${d.nombre}" eliminado.`;
@@ -106,7 +123,7 @@ export class AdminMensajeriaComponent implements OnInit {
     this.mensajeExito = null;
     this.mensajeError = null;
     if (!this.nuevaRegla.destinoId) {
-      alert('Seleccione un destino.');
+      this.mensajeError = 'Seleccione un destino.';
       return;
     }
     this.adminService.crearRegla({
@@ -122,8 +139,18 @@ export class AdminMensajeriaComponent implements OnInit {
     });
   }
 
-  public eliminarRegla(r: ReglaDistribucion): void {
-    if (!confirm(`¿Eliminar la regla ${r.evento} → ${r.destinoNombre}?`)) return;
+  public solicitarEliminarRegla(r: ReglaDistribucion): void {
+    this.reglaAEliminar = r;
+  }
+
+  public cancelarEliminarRegla(): void {
+    this.reglaAEliminar = null;
+  }
+
+  public confirmarEliminarRegla(): void {
+    const r = this.reglaAEliminar;
+    this.reglaAEliminar = null;
+    if (!r) return;
     this.adminService.eliminarRegla(r.id).subscribe({
       next: () => {
         this.mensajeExito = 'Regla eliminada.';

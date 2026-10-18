@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, tap } from 'rxjs';
 import { CarteleraService } from '../../services/cartelera.service';
 import { AdminService } from '../../services/admin.service';
 import { AuthService } from '../../services/auth.service';
 import { Pelicula, PeliculaRequest } from '../../models/pelicula.model';
 import { Funcion, FuncionRequest } from '../../models/funcion.model';
 import { AdminMensajeriaComponent } from '../admin-mensajeria/admin-mensajeria.component';
+
+interface ConfirmacionState {
+  titulo: string;
+  mensaje: string;
+  accion: () => void;
+}
 
 @Component({
   selector: 'app-admin',
@@ -18,36 +23,27 @@ import { AdminMensajeriaComponent } from '../admin-mensajeria/admin-mensajeria.c
 })
 export class AdminComponent implements OnInit {
   public peliculas: Pelicula[] = [];
-  public cargando: boolean = true;
-  public guardandoPelicula: boolean = false;
-  public guardandoFuncion: boolean = false;
+  public cargando = true;
+  public guardandoPelicula = false;
+  public guardandoFuncion = false;
 
-  // Formulario Película
-  public nuevaPelicula: PeliculaRequest = {
-    titulo: '',
-    descripcion: '',
-    genero: 'Acción',
-    duracion: 120,
-    clasificacion: 'TE+14',
-    imagen: ''
-  };
+  // Formulario Película (crear / editar en modal)
+  public mostrarModalPelicula = false;
+  public modoPelicula: 'crear' | 'editar' = 'crear';
+  public peliculaEditandoId: number | null = null;
+  public peliculaForm: PeliculaRequest = this.peliculaVacia();
   public archivoPortada: File | null = null;
   public vistaPreviaImagen: string | null = null;
 
   // Formulario Función
-  public mostrarModalFuncion: boolean = false;
+  public mostrarModalFuncion = false;
   public modalModo: 'crear' | 'editar' = 'crear';
   public funcionEditando: Funcion | null = null;
   public peliculaSeleccionadaParaFuncion: Pelicula | null = null;
-  public funcionesPorPelicula: { [peliculaId: string]: Funcion[] } = {};
-  public nuevaFuncion: FuncionRequest = {
-    fecha: new Date().toISOString().split('T')[0],
-    hora: '19:00:00',
-    sala: 'Sala 1 - IMAX',
-    entradasDisponibles: 50,
-    precio: 5500,
-    peliculaId: 0
-  };
+  public nuevaFuncion: FuncionRequest = this.funcionVacia(0);
+
+  // Confirmación genérica (sustituye confirm()/alert())
+  public confirmacion: ConfirmacionState | null = null;
 
   public mensajeExito: string | null = null;
   public mensajeError: string | null = null;
@@ -62,34 +58,19 @@ export class AdminComponent implements OnInit {
     this.cargarPeliculas();
   }
 
+  /**
+   * El listado del BFF (todas=true) ya trae funciones futuras embebidas en cada
+   * película: un solo request en vez de N+1 (una llamada por película).
+   */
   public cargarPeliculas(): void {
     this.cargando = true;
-    // todas=true: el admin ve tambien las peliculas sin funciones proximas (el catalogo publico las oculta)
     this.carteleraService.getPeliculas(undefined, true).subscribe({
       next: (data) => {
-        this.peliculas = data;
-        this.funcionesPorPelicula = {};
-        if (data.length === 0) {
-          this.cargando = false;
-          return;
-        }
-        forkJoin(
-          data.map((p) =>
-            this.carteleraService.getFuncionesPorPelicula(p.id).pipe(
-              tap((funciones) => {
-                this.funcionesPorPelicula[p.id] = funciones;
-              })
-            )
-          )
-        ).subscribe({
-          next: () => {
-            this.cargando = false;
-          },
-          error: () => {
-            this.mensajeError = 'Error al cargar las funciones del catálogo.';
-            this.cargando = false;
-          }
-        });
+        this.peliculas = (data || []).map((p) => ({
+          ...p,
+          funciones: p.funciones || []
+        }));
+        this.cargando = false;
       },
       error: () => {
         this.mensajeError = 'Error al cargar catálogo de películas para administración.';
@@ -99,72 +80,118 @@ export class AdminComponent implements OnInit {
   }
 
   public getFunciones(peliculaId: number): Funcion[] {
-    return this.funcionesPorPelicula[peliculaId] || [];
+    const p = this.peliculas.find((x) => x.id === peliculaId);
+    return p?.funciones || [];
   }
 
-  public onArchivoSeleccionado(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.archivoPortada = file;
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.vistaPreviaImagen = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+  public totalFunciones(): number {
+    return this.peliculas.reduce((acc, p) => acc + (p.funciones?.length || 0), 0);
   }
 
-  public guardarPelicula(): void {
-    if (!this.nuevaPelicula.titulo || !this.nuevaPelicula.genero) {
-      alert('Por favor complete los campos obligatorios.');
+  // ===================== Películas =====================
+
+  public abrirCrearPelicula(): void {
+    this.modoPelicula = 'crear';
+    this.peliculaEditandoId = null;
+    this.peliculaForm = this.peliculaVacia();
+    this.archivoPortada = null;
+    this.vistaPreviaImagen = null;
+    this.mensajeError = null;
+    this.mostrarModalPelicula = true;
+  }
+
+  public abrirEditarPelicula(p: Pelicula): void {
+    this.modoPelicula = 'editar';
+    this.peliculaEditandoId = p.id;
+    this.peliculaForm = {
+      titulo: p.titulo,
+      descripcion: p.descripcion || '',
+      genero: p.genero,
+      duracion: p.duracion,
+      clasificacion: p.clasificacion,
+      imagen: p.imagen || ''
+    };
+    this.archivoPortada = null;
+    this.vistaPreviaImagen = p.imagen || null;
+    this.mensajeError = null;
+    this.mostrarModalPelicula = true;
+  }
+
+  public cerrarModalPelicula(): void {
+    this.mostrarModalPelicula = false;
+    this.peliculaEditandoId = null;
+    this.archivoPortada = null;
+    this.vistaPreviaImagen = null;
+  }
+
+  public onArchivoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.archivoPortada = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.vistaPreviaImagen = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  public guardarPelicula(formValid: boolean | null): void {
+    if (!formValid) {
+      this.mensajeError = 'Complete los campos obligatorios (título, género, duración y clasificación).';
       return;
     }
-
     this.guardandoPelicula = true;
-    this.mensajeExito = null;
     this.mensajeError = null;
+    this.mensajeExito = null;
 
-    this.adminService.crearPeliculaConImagen(this.nuevaPelicula, this.archivoPortada || undefined)
-      .subscribe({
-        next: (peliculaCreada) => {
-          this.guardandoPelicula = false;
-          this.mensajeExito = `¡Película "${peliculaCreada.titulo}" registrada exitosamente con portada!`;
-          this.limpiarFormularioPelicula();
-          this.cargarPeliculas();
-        },
-        error: (err) => {
-          this.guardandoPelicula = false;
-          this.mensajeError = err.error?.message || 'Error al crear la película en Movie Service.';
-        }
-      });
+    const peticion =
+      this.modoPelicula === 'editar' && this.peliculaEditandoId !== null
+        ? this.adminService.actualizarPelicula(this.peliculaEditandoId, this.peliculaForm, this.archivoPortada || undefined)
+        : this.adminService.crearPeliculaConImagen(this.peliculaForm, this.archivoPortada || undefined);
+
+    peticion.subscribe({
+      next: (pelicula) => {
+        this.guardandoPelicula = false;
+        this.mensajeExito =
+          this.modoPelicula === 'editar'
+            ? `Película "${pelicula?.titulo || this.peliculaForm.titulo}" actualizada.`
+            : `Película "${pelicula?.titulo || this.peliculaForm.titulo}" registrada con portada.`;
+        this.cerrarModalPelicula();
+        this.cargarPeliculas();
+      },
+      error: (err) => {
+        this.guardandoPelicula = false;
+        this.mensajeError = err?.error?.message || 'Error al guardar la película en Movie Service.';
+      }
+    });
   }
 
   public eliminarPelicula(id: number, titulo: string): void {
-    if (confirm(`¿Estás seguro de eliminar "${titulo}" y su imagen asociada?`)) {
-      this.adminService.eliminarPelicula(id).subscribe({
-        next: () => {
-          this.mensajeExito = `Película "${titulo}" eliminada correctamente.`;
-          this.cargarPeliculas();
-        },
-        error: () => {
-          this.mensajeError = 'Error al eliminar la película.';
-        }
-      });
-    }
+    this.abrirConfirmacion(
+      'Eliminar película',
+      `¿Eliminar "${titulo}" y su imagen asociada? Las funciones también se quitan del catálogo.`,
+      () => {
+        this.adminService.eliminarPelicula(id).subscribe({
+          next: () => {
+            this.mensajeExito = `Película "${titulo}" eliminada.`;
+            this.cargarPeliculas();
+          },
+          error: () => {
+            this.mensajeError = 'Error al eliminar la película.';
+          }
+        });
+      }
+    );
   }
+
+  // ===================== Funciones =====================
 
   public abrirCrearFuncion(p: Pelicula): void {
     this.funcionEditando = null;
     this.modalModo = 'crear';
     this.peliculaSeleccionadaParaFuncion = p;
-    this.nuevaFuncion = {
-      fecha: new Date().toISOString().split('T')[0],
-      hora: '19:00:00',
-      sala: 'Sala 1 - IMAX',
-      entradasDisponibles: 50,
-      precio: 5500,
-      peliculaId: p.id
-    };
+    this.nuevaFuncion = this.funcionVacia(p.id);
     this.mostrarModalFuncion = true;
   }
 
@@ -189,13 +216,13 @@ export class AdminComponent implements OnInit {
     this.funcionEditando = null;
   }
 
-  public guardarFuncion(): void {
-    if (!this.nuevaFuncion.fecha || !this.nuevaFuncion.hora || !this.nuevaFuncion.sala) {
-      alert('Por favor complete los datos de la función.');
+  public guardarFuncion(formValid: boolean | null): void {
+    if (!formValid) {
+      this.mensajeError = 'Complete los datos de la función (fecha, hora y sala).';
       return;
     }
-
     this.guardandoFuncion = true;
+    this.mensajeError = null;
 
     const peticion =
       this.modalModo === 'editar' && this.funcionEditando
@@ -208,35 +235,58 @@ export class AdminComponent implements OnInit {
         const esEdicion = this.modalModo === 'editar';
         this.cerrarModalFuncion();
         this.mensajeExito = esEdicion
-          ? '¡Función actualizada exitosamente en Movie Service!'
-          : '¡Función programada exitosamente en Movie Service!';
+          ? 'Función actualizada en Movie Service.'
+          : 'Función programada en Movie Service.';
         this.cargarPeliculas();
       },
       error: (err) => {
         this.guardandoFuncion = false;
-        const detalle = err.error?.message || err.message || 'Error al guardar la función.';
-        console.error('[Admin] Error al guardar la función:', err);
-        alert('Error al guardar la función: ' + detalle);
+        this.mensajeError = err?.error?.message || err?.message || 'Error al guardar la función.';
       }
     });
   }
 
   public eliminarFuncion(p: Pelicula, f: Funcion): void {
-    if (confirm(`¿Eliminar la función del ${f.fecha} a las ${f.hora} de "${p.titulo}"?`)) {
-      this.adminService.eliminarFuncion(f.id).subscribe({
-        next: () => {
-          this.mensajeExito = `Función del ${f.fecha} a las ${f.hora} eliminada.`;
-          this.cargarPeliculas();
-        },
-        error: () => {
-          this.mensajeError = 'Error al eliminar la función.';
-        }
-      });
-    }
+    this.abrirConfirmacion(
+      'Eliminar función',
+      `¿Eliminar la función del ${f.fecha} a las ${f.hora} de "${p.titulo}"?`,
+      () => {
+        this.adminService.eliminarFuncion(f.id).subscribe({
+          next: () => {
+            this.mensajeExito = `Función del ${f.fecha} a las ${f.hora} eliminada.`;
+            this.cargarPeliculas();
+          },
+          error: () => {
+            this.mensajeError = 'Error al eliminar la función.';
+          }
+        });
+      }
+    );
   }
 
-  private limpiarFormularioPelicula(): void {
-    this.nuevaPelicula = {
+  // ===================== Confirmación =====================
+
+  public abrirConfirmacion(titulo: string, mensaje: string, accion: () => void): void {
+    this.confirmacion = { titulo, mensaje, accion };
+  }
+
+  public cancelarConfirmacion(): void {
+    this.confirmacion = null;
+  }
+
+  public aceptarConfirmacion(): void {
+    const accion = this.confirmacion?.accion;
+    this.confirmacion = null;
+    if (accion) accion();
+  }
+
+  public cerrarBanners(): void {
+    this.mensajeExito = null;
+    this.mensajeError = null;
+  }
+
+  private peliculaVacia(): PeliculaRequest {
+    return {
       titulo: '',
       descripcion: '',
       genero: 'Acción',
@@ -244,7 +294,16 @@ export class AdminComponent implements OnInit {
       clasificacion: 'TE+14',
       imagen: ''
     };
-    this.archivoPortada = null;
-    this.vistaPreviaImagen = null;
+  }
+
+  private funcionVacia(peliculaId: number): FuncionRequest {
+    return {
+      fecha: new Date().toISOString().split('T')[0],
+      hora: '19:00:00',
+      sala: 'Sala 1 - IMAX',
+      entradasDisponibles: 50,
+      precio: 5500,
+      peliculaId
+    };
   }
 }

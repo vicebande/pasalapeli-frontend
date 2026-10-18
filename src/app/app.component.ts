@@ -23,9 +23,7 @@ export class AppComponent implements OnInit {
       // En apps standalone reemplaza al MsalRedirectComponent de los NgModule.
       this.msalService.handleRedirectObservable().subscribe({
         error: (err) => {
-          const msg = (err?.errorMessage as string) || err?.message || String(err);
           console.error('[AppComponent] Error procesando el redirect de Azure AD:', err);
-          alert('El login con Azure AD no se pudo completar. Si el error comienza con AADSTS9... verifica que el registro de la app tenga la plataforma SPA. Detalle: ' + msg);
         }
       });
     }

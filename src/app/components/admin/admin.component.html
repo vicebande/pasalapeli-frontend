@@ -1,115 +1,87 @@
 <main class="admin-page container">
   <div class="admin-header">
     <div>
-      <h1><i class="fa-solid fa-shield-halved text-gold"></i> Panel de Administración</h1>
+      <h1><i class="fa-solid fa-shield-halved text-gold" aria-hidden="true"></i> Panel de Administración</h1>
       <p>Gestión de Cartelera, Carga de Portadas y Programación de Funciones.</p>
     </div>
     <span class="badge badge-gold">Acceso con Privilegios ADMIN</span>
   </div>
 
   <!-- Banners de Notificación -->
-  <div *ngIf="mensajeExito" class="success-banner">
-    <i class="fa-solid fa-circle-check"></i>
+  <div *ngIf="mensajeExito" class="success-banner" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
     <span>{{ mensajeExito }}</span>
+    <button type="button" class="btn-dismiss" (click)="cerrarBanners()" aria-label="Cerrar mensaje de éxito">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
   </div>
 
-  <div *ngIf="mensajeError" class="error-banner">
-    <i class="fa-solid fa-triangle-exclamation"></i>
+  <div *ngIf="mensajeError" class="error-banner" role="alert" aria-live="assertive">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
     <span>{{ mensajeError }}</span>
+    <button type="button" class="btn-dismiss" (click)="cerrarBanners()" aria-label="Cerrar mensaje de error">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
   </div>
 
   <div class="admin-grid">
-    <!-- COLUMNA 1: FORMULARIO CREAR PELÍCULA -->
+    <!-- COLUMNA 1: ACCIONES + RESUMEN -->
     <div class="admin-card">
       <div class="card-header">
-        <h3><i class="fa-solid fa-clapperboard text-red"></i> Nueva Película</h3>
-        <p>Sube la información de la película y su portada</p>
+        <h3><i class="fa-solid fa-clapperboard text-red" aria-hidden="true"></i> Gestión de Catálogo</h3>
+        <p>Crea o edita películas y programa horarios en cada una</p>
       </div>
 
-      <form (ngSubmit)="guardarPelicula()" class="admin-form">
-        <div class="form-group">
-          <label class="form-label" for="pelicula-titulo">Título de la Película *</label>
-          <input type="text" id="pelicula-titulo" [(ngModel)]="nuevaPelicula.titulo" name="titulo" class="form-input" placeholder="Ej: Gladiador II" required />
-        </div>
+      <button type="button" class="btn-primary btn-full" (click)="abrirCrearPelicula()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        Nueva Película
+      </button>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="pelicula-genero">Género *</label>
-            <input type="text" id="pelicula-genero" [(ngModel)]="nuevaPelicula.genero" name="genero" class="form-input" placeholder="Ej: Acción / Aventura" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="pelicula-duracion">Duración (min) *</label>
-            <input type="number" id="pelicula-duracion" [(ngModel)]="nuevaPelicula.duracion" name="duracion" class="form-input" required />
-          </div>
+      <div class="stats-row" aria-label="Resumen del catálogo">
+        <div class="stat-box">
+          <span class="stat-num">{{ peliculas.length }}</span>
+          <span class="stat-label">Películas</span>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="pelicula-clasificacion">Clasificación *</label>
-            <select id="pelicula-clasificacion" [(ngModel)]="nuevaPelicula.clasificacion" name="clasificacion" class="form-select">
-              <option value="TE">TE (Todo Espectador)</option>
-              <option value="TE+7">TE+7</option>
-              <option value="TE+14">TE+14</option>
-              <option value="18+">Mayores de 18</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="pelicula-imagen">URL Externa (Opcional)</label>
-            <input type="url" id="pelicula-imagen" [(ngModel)]="nuevaPelicula.imagen" name="imagen" class="form-input" placeholder="https://..." />
-          </div>
+        <div class="stat-box">
+          <span class="stat-num">{{ totalFunciones() }}</span>
+          <span class="stat-label">Funciones</span>
         </div>
+      </div>
 
-        <!-- Portada local -->
-        <div class="form-group">
-          <label class="form-label" for="pelicula-portada">
-            <i class="fa-solid fa-image text-gold"></i> Subir Portada
-          </label>
-          <input type="file" id="pelicula-portada" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
-          <div *ngIf="vistaPreviaImagen" class="preview-box">
-            <img [src]="vistaPreviaImagen" alt="Previsualización" class="preview-img" />
-            <span class="preview-text">Vista previa de la portada a guardar</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="pelicula-descripcion">Sinopsis / Descripción</label>
-          <textarea id="pelicula-descripcion" [(ngModel)]="nuevaPelicula.descripcion" name="descripcion" class="form-textarea" rows="3" placeholder="Resumen de la trama..."></textarea>
-        </div>
-
-        <button type="submit" [disabled]="guardandoPelicula" class="btn-primary btn-full">
-          <i class="fa-solid" [ngClass]="guardandoPelicula ? 'fa-spinner fa-spin' : 'fa-upload'"></i>
-          {{ guardandoPelicula ? 'Subiendo y Guardando...' : 'Registrar Película' }}
-        </button>
-      </form>
+      <p class="hint-text">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        Selecciona una película para programar funciones o editar su ficha.
+      </p>
     </div>
 
     <!-- COLUMNA 2: CATÁLOGO ACTUAL Y FUNCIONES -->
     <div class="admin-card">
       <div class="card-header">
-        <h3><i class="fa-solid fa-list-check text-blue"></i> Películas en Catálogo</h3>
+        <h3><i class="fa-solid fa-list-check text-blue" aria-hidden="true"></i> Películas en Catálogo</h3>
         <p>Administra las películas y añade horarios/funciones a cada una</p>
       </div>
 
       <div *ngIf="cargando" class="loading-box">
-        <div class="spinner"></div>
+        <div class="spinner" aria-hidden="true"></div>
         <p>Cargando catálogo...</p>
       </div>
 
-      <div *ngIf="!cargando" class="table-responsive">
+      <!-- Vista tabla (desktop) -->
+      <div *ngIf="!cargando && peliculas.length > 0" class="table-responsive table-desktop">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Portada</th>
-              <th>Título</th>
-              <th>Género</th>
-              <th>Funciones / Horarios</th>
-              <th>Acciones</th>
+              <th scope="col">Portada</th>
+              <th scope="col">Título</th>
+              <th scope="col">Género</th>
+              <th scope="col">Funciones / Horarios</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let p of peliculas">
               <td class="poster-td">
-                <img [src]="p.imagen || 'https://via.placeholder.com/60x90'" [alt]="p.titulo" class="table-thumb" />
+                <img [src]="p.imagen || 'https://via.placeholder.com/60x90'" [alt]="'Portada de ' + p.titulo" class="table-thumb" loading="lazy" />
               </td>
               <td>
                 <strong>{{ p.titulo }}</strong>
@@ -120,28 +92,71 @@
                 <div *ngIf="getFunciones(p.id).length === 0" class="sub-info">Sin funciones programadas</div>
                 <div *ngFor="let f of getFunciones(p.id)" class="funcion-chip">
                   <span class="funcion-info">
-                    <i class="fa-solid fa-calendar-day text-gold"></i> {{ f.fecha }} {{ f.hora }}
+                    <i class="fa-solid fa-calendar-day text-gold" aria-hidden="true"></i> {{ f.fecha }} {{ f.hora }}
                     <span class="funcion-meta">{{ f.sala }} · {{ f.entradasDisponibles }} cupos · ${{ f.precio | number:'1.0-0' }}</span>
                   </span>
-                  <button (click)="abrirEditarFuncion(p, f)" class="btn-action btn-edit" title="Editar Función">
-                    <i class="fa-solid fa-pen"></i>
+                  <button type="button" (click)="abrirEditarFuncion(p, f)" class="btn-action btn-edit" title="Editar Función" [attr.aria-label]="'Editar función del ' + f.fecha">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
                   </button>
-                  <button (click)="eliminarFuncion(p, f)" class="btn-action btn-del" title="Eliminar Función">
-                    <i class="fa-solid fa-trash"></i>
+                  <button type="button" (click)="eliminarFuncion(p, f)" class="btn-action btn-del" title="Eliminar Función" [attr.aria-label]="'Eliminar función del ' + f.fecha">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                   </button>
                 </div>
               </td>
               <td class="actions-td">
-                <button (click)="abrirCrearFuncion(p)" class="btn-action btn-add" title="Programar Función">
-                  <i class="fa-solid fa-calendar-plus"></i>
+                <button type="button" (click)="abrirEditarPelicula(p)" class="btn-action btn-edit" title="Editar Película" [attr.aria-label]="'Editar película ' + p.titulo">
+                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                 </button>
-                <button (click)="eliminarPelicula(p.id, p.titulo)" class="btn-action btn-del" title="Eliminar Película">
-                  <i class="fa-solid fa-trash"></i>
+                <button type="button" (click)="abrirCrearFuncion(p)" class="btn-action btn-add" title="Programar Función" [attr.aria-label]="'Programar función para ' + p.titulo">
+                  <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
+                </button>
+                <button type="button" (click)="eliminarPelicula(p.id, p.titulo)" class="btn-action btn-del" title="Eliminar Película" [attr.aria-label]="'Eliminar película ' + p.titulo">
+                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Vista tarjetas (móvil) -->
+      <div *ngIf="!cargando && peliculas.length > 0" class="movie-cards mobile-only">
+        <article *ngFor="let p of peliculas" class="movie-card">
+          <img [src]="p.imagen || 'https://via.placeholder.com/60x90'" [alt]="'Portada de ' + p.titulo" class="card-poster" loading="lazy" />
+          <div class="card-body">
+            <h4>{{ p.titulo }}</h4>
+            <p class="sub-info">{{ p.genero }} · {{ p.duracion }} min · {{ p.clasificacion }}</p>
+            <p *ngIf="getFunciones(p.id).length === 0" class="sub-info">Sin funciones programadas</p>
+            <div *ngFor="let f of getFunciones(p.id)" class="funcion-chip">
+              <span class="funcion-info">
+                <i class="fa-solid fa-calendar-day text-gold" aria-hidden="true"></i> {{ f.fecha }} {{ f.hora }}
+                <span class="funcion-meta">{{ f.sala }} · {{ f.entradasDisponibles }} cupos · ${{ f.precio | number:'1.0-0' }}</span>
+              </span>
+              <button type="button" (click)="abrirEditarFuncion(p, f)" class="btn-action btn-edit" aria-label="Editar función">
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+              </button>
+              <button type="button" (click)="eliminarFuncion(p, f)" class="btn-action btn-del" aria-label="Eliminar función">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="card-actions">
+              <button type="button" (click)="abrirEditarPelicula(p)" class="btn-action btn-edit" aria-label="Editar película">
+                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar
+              </button>
+              <button type="button" (click)="abrirCrearFuncion(p)" class="btn-action btn-add" aria-label="Programar función">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Función
+              </button>
+              <button type="button" (click)="eliminarPelicula(p.id, p.titulo)" class="btn-action btn-del" aria-label="Eliminar película">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div *ngIf="!cargando && peliculas.length === 0" class="empty-box">
+        <i class="fa-solid fa-film empty-icon" aria-hidden="true"></i>
+        <p>No hay películas en el catálogo. Crea la primera desde el panel de la izquierda.</p>
       </div>
     </div>
   </div>
@@ -149,49 +164,148 @@
   <!-- Administración de la mensajería asíncrona (destinos, reglas, mensajes fallidos) -->
   <app-admin-mensajeria></app-admin-mensajeria>
 
-  <!-- MODAL: AGREGAR FUNCIÓN -->
-  <div *ngIf="mostrarModalFuncion && peliculaSeleccionadaParaFuncion" class="modal-backdrop">
-    <div class="modal-content">
-      <button (click)="cerrarModalFuncion()" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
-      
-      <h2>{{ modalModo === 'editar' ? 'Editar Función' : 'Programar Nueva Función' }}</h2>
+  <!-- MODAL: CREAR / EDITAR PELÍCULA -->
+  <div *ngIf="mostrarModalPelicula" class="modal-backdrop" (click)="cerrarModalPelicula()">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-pelicula-titulo" (click)="$event.stopPropagation()">
+      <button type="button" (click)="cerrarModalPelicula()" class="btn-close-modal" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <h2 id="modal-pelicula-titulo">{{ modoPelicula === 'editar' ? 'Editar Película' : 'Nueva Película' }}</h2>
+      <p class="modal-sub">Complete la ficha técnica y la portada de la película.</p>
+
+      <form #formPelicula="ngForm" (ngSubmit)="guardarPelicula(formPelicula.valid)" class="admin-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="pelicula-titulo">Título de la Película *</label>
+          <input type="text" id="pelicula-titulo" [(ngModel)]="peliculaForm.titulo" name="titulo" class="form-input" placeholder="Ej: Gladiador II" required minlength="2" #tituloField="ngModel" />
+          <div *ngIf="tituloField.invalid && (tituloField.dirty || tituloField.touched)" class="field-error">
+            El título es obligatorio (mínimo 2 caracteres).
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="pelicula-genero">Género *</label>
+            <input type="text" id="pelicula-genero" [(ngModel)]="peliculaForm.genero" name="genero" class="form-input" placeholder="Ej: Acción / Aventura" required #generoField="ngModel" />
+            <div *ngIf="generoField.invalid && (generoField.dirty || generoField.touched)" class="field-error">El género es obligatorio.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pelicula-duracion">Duración (min) *</label>
+            <input type="number" id="pelicula-duracion" [(ngModel)]="peliculaForm.duracion" name="duracion" class="form-input" required min="1" max="600" #duracionField="ngModel" />
+            <div *ngIf="duracionField.invalid && (duracionField.dirty || duracionField.touched)" class="field-error">Ingrese una duración válida (1–600).</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="pelicula-clasificacion">Clasificación *</label>
+            <select id="pelicula-clasificacion" [(ngModel)]="peliculaForm.clasificacion" name="clasificacion" class="form-select" required>
+              <option value="TE">TE (Todo Espectador)</option>
+              <option value="TE+7">TE+7</option>
+              <option value="TE+14">TE+14</option>
+              <option value="18+">Mayores de 18</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pelicula-imagen">URL Externa (Opcional)</label>
+            <input type="url" id="pelicula-imagen" [(ngModel)]="peliculaForm.imagen" name="imagen" class="form-input" placeholder="https://..." />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pelicula-portada">
+            <i class="fa-solid fa-image text-gold" aria-hidden="true"></i>
+            {{ modoPelicula === 'editar' ? 'Cambiar Portada (opcional)' : 'Subir Portada' }}
+          </label>
+          <input type="file" id="pelicula-portada" (change)="onArchivoSeleccionado($event)" accept="image/*" class="form-input file-input" />
+          <div *ngIf="vistaPreviaImagen" class="preview-box">
+            <img [src]="vistaPreviaImagen" alt="Previsualización de la portada" class="preview-img" />
+            <span class="preview-text">Vista previa de la portada</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pelicula-descripcion">Sinopsis / Descripción</label>
+          <textarea id="pelicula-descripcion" [(ngModel)]="peliculaForm.descripcion" name="descripcion" class="form-textarea" rows="3" placeholder="Resumen de la trama..." maxlength="2000"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" (click)="cerrarModalPelicula()" class="cancel-btn btn-full">Cancelar</button>
+          <button type="submit" [disabled]="guardandoPelicula || formPelicula.invalid" class="confirm-btn btn-full">
+            <i class="fa-solid" [ngClass]="guardandoPelicula ? 'fa-spinner fa-spin' : 'fa-save'" aria-hidden="true"></i>
+            {{ guardandoPelicula ? 'Guardando...' : (modoPelicula === 'editar' ? 'Guardar Cambios' : 'Registrar Película') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR / EDITAR FUNCIÓN -->
+  <div *ngIf="mostrarModalFuncion && peliculaSeleccionadaParaFuncion" class="modal-backdrop" (click)="cerrarModalFuncion()">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-funcion-titulo" (click)="$event.stopPropagation()">
+      <button type="button" (click)="cerrarModalFuncion()" class="btn-close-modal" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <h2 id="modal-funcion-titulo">{{ modalModo === 'editar' ? 'Editar Función' : 'Programar Nueva Función' }}</h2>
       <p class="modal-sub">Para: <strong>{{ peliculaSeleccionadaParaFuncion.titulo }}</strong></p>
 
-      <div class="form-group mt-3">
-        <label class="form-label" for="funcion-fecha">Fecha de Proyección:</label>
-        <input type="date" id="funcion-fecha" [(ngModel)]="nuevaFuncion.fecha" class="form-input" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="funcion-hora">Hora:</label>
-        <input type="time" id="funcion-hora" step="1" [(ngModel)]="nuevaFuncion.hora" class="form-input" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="funcion-sala">Sala:</label>
-        <select id="funcion-sala" [(ngModel)]="nuevaFuncion.sala" class="form-select">
-          <option value="Sala 1 - IMAX">Sala 1 - IMAX</option>
-          <option value="Sala 2 - 3D Atmos">Sala 2 - 3D Atmos</option>
-          <option value="Sala 3 - 2D Premium">Sala 3 - 2D Premium</option>
-          <option value="Sala 4 - 2D Tradicional">Sala 4 - 2D Tradicional</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="funcion-cupos">Cupos Disponibles:</label>
-          <input type="number" id="funcion-cupos" [(ngModel)]="nuevaFuncion.entradasDisponibles" class="form-input" />
+      <form #formFuncion="ngForm" (ngSubmit)="guardarFuncion(formFuncion.valid)" novalidate>
+        <div class="form-group mt-3">
+          <label class="form-label" for="funcion-fecha">Fecha de Proyección: *</label>
+          <input type="date" id="funcion-fecha" [(ngModel)]="nuevaFuncion.fecha" name="fecha" class="form-input" required #fechaField="ngModel" />
+          <div *ngIf="fechaField.invalid && (fechaField.dirty || fechaField.touched)" class="field-error">La fecha es obligatoria.</div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="funcion-precio">Precio Entrada ($ CLP):</label>
-          <input type="number" id="funcion-precio" [(ngModel)]="nuevaFuncion.precio" class="form-input" />
-        </div>
-      </div>
 
-      <button (click)="guardarFuncion()" [disabled]="guardandoFuncion" class="btn-primary btn-full mt-3">
-        <i class="fa-solid" [ngClass]="guardandoFuncion ? 'fa-spinner fa-spin' : 'fa-calendar-check'"></i>
-        {{ guardandoFuncion ? 'Guardando...' : (modalModo === 'editar' ? 'Actualizar Función' : 'Confirmar y Programar') }}
-      </button>
+        <div class="form-group">
+          <label class="form-label" for="funcion-hora">Hora: *</label>
+          <input type="time" id="funcion-hora" step="1" [(ngModel)]="nuevaFuncion.hora" name="hora" class="form-input" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="funcion-sala">Sala: *</label>
+          <select id="funcion-sala" [(ngModel)]="nuevaFuncion.sala" name="sala" class="form-select" required>
+            <option value="Sala 1 - IMAX">Sala 1 - IMAX</option>
+            <option value="Sala 2 - 3D Atmos">Sala 2 - 3D Atmos</option>
+            <option value="Sala 3 - 2D Premium">Sala 3 - 2D Premium</option>
+            <option value="Sala 4 - 2D Tradicional">Sala 4 - 2D Tradicional</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="funcion-cupos">Cupos Disponibles: *</label>
+            <input type="number" id="funcion-cupos" [(ngModel)]="nuevaFuncion.entradasDisponibles" name="entradasDisponibles" class="form-input" required min="1" max="500" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="funcion-precio">Precio Entrada ($ CLP): *</label>
+            <input type="number" id="funcion-precio" [(ngModel)]="nuevaFuncion.precio" name="precio" class="form-input" required min="0" step="100" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" (click)="cerrarModalFuncion()" class="cancel-btn btn-full">Cancelar</button>
+          <button type="submit" [disabled]="guardandoFuncion || formFuncion.invalid" class="confirm-btn btn-full">
+            <i class="fa-solid" [ngClass]="guardandoFuncion ? 'fa-spinner fa-spin' : 'fa-calendar-check'" aria-hidden="true"></i>
+            {{ guardandoFuncion ? 'Guardando...' : (modalModo === 'editar' ? 'Actualizar Función' : 'Confirmar y Programar') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMACIÓN (eliminar película / función) -->
+  <div *ngIf="confirmacion" class="modal-backdrop" (click)="cancelarConfirmacion()">
+    <div class="modal-content confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-titulo" (click)="$event.stopPropagation()">
+      <div class="confirm-icon" aria-hidden="true">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h2 id="confirm-titulo">{{ confirmacion.titulo }}</h2>
+      <p class="confirm-message">{{ confirmacion.mensaje }}</p>
+      <div class="modal-actions">
+        <button type="button" (click)="cancelarConfirmacion()" class="cancel-btn btn-full">Cancelar</button>
+        <button type="button" (click)="aceptarConfirmacion()" class="confirm-btn btn-full">Sí, continuar</button>
+      </div>
     </div>
   </div>
 </main>

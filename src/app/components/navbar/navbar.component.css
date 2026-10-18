@@ -174,3 +174,114 @@
 .btn-logout:hover {
   color: var(--danger);
 }
+
+/* Focus visible accesible (teclado) */
+.navbar-header a:focus-visible,
+.navbar-header button:focus-visible {
+  outline: 2px solid var(--accent-blue, #38bdf8);
+  outline-offset: 2px;
+}
+
+/* Botón hamburguesa (oculto en desktop) */
+.btn-hamburger {
+  display: none;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  margin-left: auto;
+}
+
+.navbar-menu {
+  display: contents;
+}
+
+/* ===== Móvil / tablet: menú hamburguesa ===== */
+@media (max-width: 900px) {
+  .navbar-container {
+    flex-wrap: nowrap;
+    position: relative;
+  }
+
+  .btn-hamburger {
+    display: inline-flex;
+  }
+
+  .navbar-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    z-index: 200;
+  }
+
+  .navbar-menu.menu-open {
+    display: flex;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .nav-link {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  .navbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+  }
+
+  .demo-switch-box,
+  .user-profile-badge,
+  .navbar-actions .btn-primary {
+    justify-content: center;
+  }
+
+  .user-name {
+    max-width: 8rem;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-subtitle {
+    display: none;
+  }
+  .brand-title {
+    font-size: 1rem;
+  }
+}

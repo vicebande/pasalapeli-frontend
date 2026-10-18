@@ -53,6 +53,26 @@ button {
   transition: all 0.2s ease;
 }
 
+/* Foco visible solo con teclado (accesibilidad) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-blue, #38bdf8);
+  outline-offset: 2px;
+}
+
+/* Objetivos táctiles mínimos ~44px en botones compartidos */
+@media (pointer: coarse) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    min-height: 44px;
+  }
+}
+
 /* Layout Utilities */
 .container {
   width: 100%;
@@ -178,6 +198,97 @@ button {
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+/* Botones de acción compartidos por modales (confirmar/cancelar) */
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancel,
+.cancel-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-cancel:hover:not(:disabled),
+.cancel-btn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-primary);
+}
+
+.btn-confirm,
+.confirm-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  transition: filter 0.15s, opacity 0.15s;
+}
+
+.btn-confirm:hover:not(:disabled),
+.confirm-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-confirm:disabled,
+.confirm-btn:disabled,
+.btn-cancel:disabled,
+.cancel-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-danger-soft {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-danger-soft:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.35);
+  color: #fff;
+}
+
+.btn-close-modal {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-close-modal:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
 }
 
 /* Custom Inputs */

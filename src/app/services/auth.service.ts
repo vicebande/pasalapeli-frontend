@@ -163,7 +163,7 @@ export class AuthService {
         }
       } catch (error) {
         console.error('[AuthService] Error iniciando login con Azure AD:', error);
-        alert('No se pudo iniciar sesión (consulta la consola del navegador). Error: ' + (error instanceof Error ? error.message : String(error)));
+        // Sin alert() nativo: el detalle va a la consola; el usuario puede reintentar el login.
       }
     } else {
       // Alternar login demo
@@ -223,6 +223,11 @@ export class AuthService {
   }
 
   public getUserRoleHeader(): { [header: string]: string } {
+    // Solo en modo demo (Azure desactivado). En produccion NUNCA se envian
+    // cabeceras X-Dev-User-*: el backend las ignora (Azure on) pero no deben salir.
+    if (environment.azureAd.enabled) {
+      return {};
+    }
     const user = this.currentUserSubject.value;
     if (!user) return {};
     return {

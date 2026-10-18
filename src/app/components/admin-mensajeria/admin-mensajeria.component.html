@@ -1,24 +1,24 @@
 <section class="msg-admin">
   <div class="msg-header">
-    <h3><i class="fa-solid fa-tower-broadcast text-red"></i> Mensajería Asíncrona (AWS SNS/SQS)</h3>
+    <h3><i class="fa-solid fa-tower-broadcast text-red" aria-hidden="true"></i> Mensajería Asíncrona (AWS SNS/SQS)</h3>
     <p>Administra los destinos de notificación y las reglas de distribución de eventos.</p>
   </div>
 
-  <div *ngIf="mensajeExito" class="success-banner">
-    <i class="fa-solid fa-circle-check"></i> <span>{{ mensajeExito }}</span>
+  <div *ngIf="mensajeExito" class="success-banner" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-check" aria-hidden="true"></i> <span>{{ mensajeExito }}</span>
   </div>
-  <div *ngIf="mensajeError" class="error-banner">
-    <i class="fa-solid fa-triangle-exclamation"></i> <span>{{ mensajeError }}</span>
+  <div *ngIf="mensajeError" class="error-banner" role="alert" aria-live="assertive">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> <span>{{ mensajeError }}</span>
   </div>
 
   <div class="msg-grid">
     <!-- Destinos -->
     <div class="msg-card">
-      <h4><i class="fa-solid fa-bullseye text-blue"></i> Destinos</h4>
+      <h4><i class="fa-solid fa-bullseye text-blue" aria-hidden="true"></i> Destinos</h4>
 
       <table class="msg-table" *ngIf="destinos.length > 0">
         <thead>
-          <tr><th>Nombre</th><th>Tipo</th><th>Valor</th><th></th></tr>
+          <tr><th scope="col">Nombre</th><th scope="col">Tipo</th><th scope="col">Valor</th><th scope="col"><span class="sr-only">Acciones</span></th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let d of destinos">
@@ -26,8 +26,8 @@
             <td><span class="chip">{{ d.tipo }}</span></td>
             <td>{{ d.valor || '—' }}</td>
             <td>
-              <button class="btn-del" (click)="eliminarDestino(d)" title="Eliminar destino">
-                <i class="fa-solid fa-trash"></i>
+              <button type="button" class="btn-del btn-action-touch" (click)="solicitarEliminarDestino(d)" title="Eliminar destino" [attr.aria-label]="'Eliminar destino ' + d.nombre">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
@@ -36,23 +36,23 @@
       <p class="msg-empty" *ngIf="destinos.length === 0">Sin destinos configurados.</p>
 
       <form class="msg-form" (ngSubmit)="crearDestino()">
-        <input class="msg-input" type="text" [(ngModel)]="nuevoDestino.nombre" name="nombre" placeholder="Nombre del destino" aria-label="Nombre del destino" />
+        <input class="msg-input" type="text" [(ngModel)]="nuevoDestino.nombre" name="nombre" placeholder="Nombre del destino" aria-label="Nombre del destino" required />
         <select class="msg-input" [(ngModel)]="nuevoDestino.tipo" name="tipo" aria-label="Tipo de destino">
           <option *ngFor="let t of tiposDestino" [value]="t">{{ t }}</option>
         </select>
         <input *ngIf="requiereValor" class="msg-input" type="text" [(ngModel)]="nuevoDestino.valor"
                name="valor" [placeholder]="nuevoDestino.tipo === 'ROL' ? 'Rol (ADMIN/CLIENTE)' : 'ID de usuario'" aria-label="Valor del destino" />
-        <button class="btn-add" type="submit"><i class="fa-solid fa-plus"></i> Crear destino</button>
+        <button class="btn-add" type="submit"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear destino</button>
       </form>
     </div>
 
     <!-- Reglas -->
     <div class="msg-card">
-      <h4><i class="fa-solid fa-diagram-project text-gold"></i> Reglas de distribución</h4>
+      <h4><i class="fa-solid fa-diagram-project text-gold" aria-hidden="true"></i> Reglas de distribución</h4>
 
       <table class="msg-table" *ngIf="reglas.length > 0">
         <thead>
-          <tr><th>Evento</th><th>Destino</th><th>Activo</th><th></th></tr>
+          <tr><th scope="col">Evento</th><th scope="col">Destino</th><th scope="col">Activo</th><th scope="col"><span class="sr-only">Acciones</span></th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let r of reglas">
@@ -60,8 +60,8 @@
             <td>{{ r.destinoNombre }}</td>
             <td>{{ r.activo ? 'Sí' : 'No' }}</td>
             <td>
-              <button class="btn-del" (click)="eliminarRegla(r)" title="Eliminar regla">
-                <i class="fa-solid fa-trash"></i>
+              <button type="button" class="btn-del btn-action-touch" (click)="solicitarEliminarRegla(r)" title="Eliminar regla" [attr.aria-label]="'Eliminar regla ' + r.evento">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
@@ -77,14 +77,14 @@
           <option [ngValue]="0" disabled>Seleccione destino...</option>
           <option *ngFor="let d of destinos" [ngValue]="d.id">{{ d.nombre }}</option>
         </select>
-        <button class="btn-add" type="submit"><i class="fa-solid fa-plus"></i> Crear regla</button>
+        <button class="btn-add" type="submit"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear regla</button>
       </form>
     </div>
   </div>
 
   <!-- Anuncio manual a todos los usuarios -->
   <div class="msg-card msg-full">
-    <h4><i class="fa-solid fa-bullhorn text-red"></i> Anuncio a todos los usuarios</h4>
+    <h4><i class="fa-solid fa-bullhorn text-red" aria-hidden="true"></i> Anuncio a todos los usuarios</h4>
     <p class="msg-anuncio-hint">
       Envía una notificación manual a los usuarios registrados (evento
       <span class="chip chip-event">ANUNCIO</span> si existe una regla de distribución).
@@ -98,7 +98,7 @@
       <div class="anuncio-footer">
         <span class="anuncio-contador">{{ anuncioMensaje.length }}/500</span>
         <button class="btn-add" type="submit" [disabled]="enviandoAnuncio">
-          <i class="fa-solid" [ngClass]="enviandoAnuncio ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+          <i class="fa-solid" [ngClass]="enviandoAnuncio ? 'fa-spinner fa-spin' : 'fa-paper-plane'" aria-hidden="true"></i>
           {{ enviandoAnuncio ? 'Enviando...' : 'Enviar anuncio' }}
         </button>
       </div>
@@ -107,10 +107,10 @@
 
   <!-- Mensajes fallidos -->
   <div class="msg-card msg-full">
-    <h4><i class="fa-solid fa-triangle-exclamation text-gold"></i> Mensajes fallidos (Dead-Letter Queue)</h4>
+    <h4><i class="fa-solid fa-triangle-exclamation text-gold" aria-hidden="true"></i> Mensajes fallidos (Dead-Letter Queue)</h4>
     <table class="msg-table" *ngIf="mensajesFallidos.length > 0">
       <thead>
-        <tr><th>Cola</th><th>Error</th><th>Intentos</th><th>Fecha</th></tr>
+        <tr><th scope="col">Cola</th><th scope="col">Error</th><th scope="col">Intentos</th><th scope="col">Fecha</th></tr>
       </thead>
       <tbody>
         <tr *ngFor="let m of mensajesFallidos">
@@ -122,7 +122,34 @@
       </tbody>
     </table>
     <p class="msg-empty" *ngIf="mensajesFallidos.length === 0">
-      No hay mensajes fallidos. ✅
+      No hay mensajes fallidos.
+      <i class="fa-solid fa-circle-check text-green" aria-hidden="true"></i>
     </p>
+  </div>
+
+  <!-- Modal: confirmar eliminar destino -->
+  <div *ngIf="destinoAEliminar" class="modal-backdrop" (click)="cancelarEliminarDestino()">
+    <div class="modal-content confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-destino-titulo" (click)="$event.stopPropagation()">
+      <div class="confirm-icon" aria-hidden="true"><i class="fa-solid fa-trash"></i></div>
+      <h2 id="confirm-destino-titulo">Eliminar destino</h2>
+      <p class="confirm-message">¿Eliminar el destino <strong>{{ destinoAEliminar.nombre }}</strong> y sus reglas asociadas?</p>
+      <div class="modal-actions">
+        <button type="button" (click)="cancelarEliminarDestino()" class="cancel-btn btn-full">Cancelar</button>
+        <button type="button" (click)="confirmarEliminarDestino()" class="confirm-btn btn-full">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: confirmar eliminar regla -->
+  <div *ngIf="reglaAEliminar" class="modal-backdrop" (click)="cancelarEliminarRegla()">
+    <div class="modal-content confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-regla-titulo" (click)="$event.stopPropagation()">
+      <div class="confirm-icon" aria-hidden="true"><i class="fa-solid fa-trash"></i></div>
+      <h2 id="confirm-regla-titulo">Eliminar regla</h2>
+      <p class="confirm-message">¿Eliminar la regla <strong>{{ reglaAEliminar.evento }}</strong> → <strong>{{ reglaAEliminar.destinoNombre }}</strong>?</p>
+      <div class="modal-actions">
+        <button type="button" (click)="cancelarEliminarRegla()" class="cancel-btn btn-full">Cancelar</button>
+        <button type="button" (click)="confirmarEliminarRegla()" class="confirm-btn btn-full">Sí, eliminar</button>
+      </div>
+    </div>
   </div>
 </section>
