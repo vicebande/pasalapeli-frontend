@@ -1,7 +1,7 @@
 <main class="admin-page container">
   <div class="admin-header">
     <div>
-      <h1><i class="fa-solid fa-shield-halved text-gold" aria-hidden="true"></i> Panel de Administración</h1>
+      <h1><i class="fa-solid fa-shield-halved text-accent" aria-hidden="true"></i> Panel de Administración</h1>
       <p>Gestión de Cartelera, Carga de Portadas y Programación de Funciones.</p>
     </div>
     <span class="badge badge-gold">Acceso con Privilegios ADMIN</span>
@@ -28,7 +28,7 @@
     <!-- COLUMNA 1: ACCIONES + RESUMEN -->
     <div class="admin-card">
       <div class="card-header">
-        <h3><i class="fa-solid fa-clapperboard text-red" aria-hidden="true"></i> Gestión de Catálogo</h3>
+        <h3><i class="fa-solid fa-clapperboard text-accent" aria-hidden="true"></i> Gestión de Catálogo</h3>
         <p>Crea o edita películas y programa horarios en cada una</p>
       </div>
 
@@ -57,7 +57,7 @@
     <!-- COLUMNA 2: CATÁLOGO ACTUAL Y FUNCIONES -->
     <div class="admin-card">
       <div class="card-header">
-        <h3><i class="fa-solid fa-list-check text-blue" aria-hidden="true"></i> Películas en Catálogo</h3>
+        <h3><i class="fa-solid fa-list-check text-accent" aria-hidden="true"></i> Películas en Catálogo</h3>
         <p>Administra las películas y añade horarios/funciones a cada una</p>
       </div>
 
@@ -87,7 +87,7 @@
                 <strong>{{ p.titulo }}</strong>
                 <div class="sub-info">{{ p.duracion }} min | {{ p.clasificacion }}</div>
               </td>
-              <td><span class="badge badge-blue">{{ p.genero }}</span></td>
+              <td><span class="badge badge-neutral">{{ p.genero }}</span></td>
               <td>
                 <div *ngIf="getFunciones(p.id).length === 0" class="sub-info">Sin funciones programadas</div>
                 <div *ngFor="let f of getFunciones(p.id)" class="funcion-chip">

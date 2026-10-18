@@ -96,8 +96,7 @@
 }
 
 .table-responsive {
-  overflow: auto;
-  max-height: 560px;
+  overflow-x: auto;
   overscroll-behavior: contain;
 }
 
@@ -117,7 +116,7 @@
 }
 
 .table-responsive::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-red);
+  background: var(--accent);
 }
 
 .admin-table {
@@ -187,33 +186,34 @@
 }
 
 .btn-add {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
+  background: rgba(255, 183, 0, 0.15);
+  color: var(--accent);
 }
 
 .btn-add:hover {
-  background: #38bdf8;
-  color: #fff;
+  background: var(--accent);
+  color: #21222B;
 }
 
 .btn-del {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: rgba(246, 68, 68, 0.15);
+  color: var(--danger);
 }
 
 .btn-del:hover {
-  background: #ef4444;
+  background: var(--danger);
   color: #fff;
 }
 
 .btn-edit {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
+  background: rgba(173, 181, 189, 0.12);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-edit:hover {
-  background: #fbbf24;
-  color: #fff;
+  background: var(--text-secondary);
+  color: #21222B;
 }
 
 .funcion-chip {
@@ -223,7 +223,7 @@
   padding: 0.4rem 0.6rem;
   margin-bottom: 0.4rem;
   border-radius: 8px;
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(41, 43, 54, 0.6);
   border: 1px solid var(--border-color);
 }
 
@@ -248,7 +248,7 @@
 }
 
 .success-banner {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(25, 135, 84, 0.18);
   border: 1px solid var(--success);
   color: #6ee7b7;
   padding: 1rem;
@@ -303,7 +303,7 @@
 }
 
 .stat-box {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(41, 43, 54, 0.6);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1rem;
@@ -316,7 +316,7 @@
 .stat-num {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--accent-gold, #fbbf24);
+  color: var(--accent-gold);
   line-height: 1;
 }
 
@@ -337,7 +337,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(246, 68, 68, 0.15);
   color: #f87171;
   display: flex;
   align-items: center;
@@ -382,7 +382,10 @@
 }
 
 /* ===== Móvil: tarjetas en vez de tabla ===== */
-.mobile-only {
+/* Specificidad doble (.movie-cards.mobile-only): si fuera solo .mobile-only,
+   la regla .movie-cards { display: flex } de abajo la ganaría por orden y la
+   tabla + tarjetas se renderizarían a la vez (películas "dobles"). */
+.movie-cards.mobile-only {
   display: none;
 }
 
@@ -395,7 +398,7 @@
 .movie-card {
   display: flex;
   gap: 0.75rem;
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(41, 43, 54, 0.5);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 0.75rem;
@@ -440,7 +443,7 @@
   .table-desktop {
     display: none;
   }
-  .mobile-only {
+  .movie-cards.mobile-only {
     display: flex;
   }
   .admin-header h1 {

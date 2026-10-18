@@ -96,7 +96,7 @@
 .ticket-card-footer {
   border-top: 1px dashed var(--border-color);
   padding: 0.75rem 1.25rem;
-  background: rgba(10, 14, 23, 0.4);
+  background: rgba(33, 34, 43, 0.4);
 }
 
 .qr-preview {
@@ -166,8 +166,8 @@
   height: 64px;
   margin: 0 auto 1rem;
   border-radius: 50%;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(255, 183, 0, 0.12);
+  border: 1px solid rgba(255, 183, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,8 +222,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(246, 68, 68, 0.12);
+  border: 1px solid rgba(246, 68, 68, 0.35);
   color: #fca5a5;
   font-size: 0.9rem;
   border-radius: 8px;
@@ -251,7 +251,7 @@
 
 .cancel-btn:hover:not(:disabled) {
   color: #fff;
-  border-color: #475569;
+  border-color: #4D5165;
 }
 
 .confirm-btn {
@@ -286,8 +286,8 @@
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.55rem 0.7rem;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(255, 183, 0, 0.1);
+  border: 1px solid rgba(255, 183, 0, 0.4);
   border-radius: 10px;
   color: #fde68a;
   font-size: 0.9rem;
@@ -295,7 +295,7 @@
 }
 
 .refund-hint i {
-  color: #fbbf24;
+  color: #FFC533;
   flex: 0 0 auto;
 }
 
@@ -306,7 +306,7 @@
 
 .ticket-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(229, 9, 20, 0.45);
+  border-color: rgba(255, 183, 0, 0.45);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 

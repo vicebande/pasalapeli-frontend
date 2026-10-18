@@ -84,7 +84,7 @@
   padding: 0.1rem 0.6rem;
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--accent-blue);
+  color: var(--accent);
 }
 
 .chip-event {
@@ -116,11 +116,11 @@
 
 .msg-input:focus {
   outline: none;
-  border-color: var(--accent-red);
+  border-color: var(--accent);
 }
 
 .btn-add {
-  background: var(--accent-red);
+  background: var(--accent);
   color: #fff;
   border-radius: 9px;
   padding: 0.55rem 1rem;
@@ -132,7 +132,7 @@
 }
 
 .btn-add:hover {
-  background: var(--accent-red-hover);
+  background: var(--accent-hover);
 }
 
 .btn-add:disabled {
@@ -185,7 +185,7 @@
 }
 
 .btn-del:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(246, 68, 68, 0.12);
 }
 
 .btn-action-touch {
@@ -207,7 +207,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(246, 68, 68, 0.15);
   color: #f87171;
   display: flex;
   align-items: center;
@@ -261,7 +261,7 @@
 }
 
 .error-banner {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(246, 68, 68, 0.12);
   color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(246, 68, 68, 0.3);
 }

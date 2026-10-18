@@ -1,6 +1,6 @@
 <section class="msg-admin">
   <div class="msg-header">
-    <h3><i class="fa-solid fa-tower-broadcast text-red" aria-hidden="true"></i> Mensajería Asíncrona (AWS SNS/SQS)</h3>
+    <h3><i class="fa-solid fa-tower-broadcast text-accent" aria-hidden="true"></i> Mensajería Asíncrona (AWS SNS/SQS)</h3>
     <p>Administra los destinos de notificación y las reglas de distribución de eventos.</p>
   </div>
 
@@ -14,7 +14,7 @@
   <div class="msg-grid">
     <!-- Destinos -->
     <div class="msg-card">
-      <h4><i class="fa-solid fa-bullseye text-blue" aria-hidden="true"></i> Destinos</h4>
+      <h4><i class="fa-solid fa-bullseye text-accent" aria-hidden="true"></i> Destinos</h4>
 
       <table class="msg-table" *ngIf="destinos.length > 0">
         <thead>
@@ -84,7 +84,7 @@
 
   <!-- Anuncio manual a todos los usuarios -->
   <div class="msg-card msg-full">
-    <h4><i class="fa-solid fa-bullhorn text-red" aria-hidden="true"></i> Anuncio a todos los usuarios</h4>
+    <h4><i class="fa-solid fa-bullhorn text-accent" aria-hidden="true"></i> Anuncio a todos los usuarios</h4>
     <p class="msg-anuncio-hint">
       Envía una notificación manual a los usuarios registrados (evento
       <span class="chip chip-event">ANUNCIO</span> si existe una regla de distribución).

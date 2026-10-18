@@ -45,7 +45,7 @@
         <div *ngIf="!isAzureEnabled" class="demo-switch-box">
           <span class="demo-label">Modo Prueba:</span>
           <button type="button" (click)="toggleRole()" class="btn-demo-toggle" [title]="'Cambiar a ' + (authService.isAdmin() ? 'Cliente' : 'Admin')">
-            <i class="fa-solid" [ngClass]="authService.isAdmin() ? 'fa-user-tie text-gold' : 'fa-user text-blue'" aria-hidden="true"></i>
+            <i class="fa-solid" [ngClass]="authService.isAdmin() ? 'fa-user-tie text-accent' : 'fa-user text-accent'" aria-hidden="true"></i>
             <span>{{ authService.isAdmin() ? 'ADMIN' : 'CLIENTE' }}</span>
           </button>
         </div>
@@ -57,7 +57,7 @@
           </div>
           <div class="user-info">
             <span class="user-name">{{ currentUser.name }}</span>
-            <span class="user-role badge" [ngClass]="authService.isAdmin() ? 'badge-gold' : 'badge-blue'">
+            <span class="user-role badge" [ngClass]="authService.isAdmin() ? 'badge-gold' : 'badge-neutral'">
               {{ authService.isAdmin() ? 'Admin' : 'Cliente' }}
             </span>
           </div>
