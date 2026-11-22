@@ -40,7 +40,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 60m
+          command_timeout: 90m
           envs: REPO_OWNER,EC2_APPS_HOST,AZURE_CLIENT_ID,AZURE_TENANT_ID,APP_BASE_URL,EC2_DOMAIN,CERTBOT_EMAIL
           script: |
             set -euo pipefail
@@ -52,7 +52,7 @@ jobs:
             # serializa docker compose up para evitar conflictos de contenedor.
             LOCKFILE=/tmp/pasalapeli-deploy.lock
             exec 9>"$LOCKFILE"
-            flock -x -w 1800 9
+            flock -x -w 3600 9
             echo "==> Lock adquirido $LOCKFILE (despliegue "$SERVICE")"
 
             # APP_BASE_URL: si no viene definida, deriva de EC2_DOMAIN
@@ -99,9 +99,9 @@ jobs:
             EC2_APPS_HOST="$EC2_APPS_HOST" AZURE_CLIENT_ID="$AZURE_CLIENT_ID" AZURE_TENANT_ID="$AZURE_TENANT_ID" APP_BASE_URL="$APP_BASE_URL" docker compose -f "$COMPOSE_FILE" up -d --build "$SERVICE"
 
             echo "==> Waiting for health check..."
-            for i in $(seq 1 30); do
+            for i in $(seq 1 60); do
               STATUS=$(docker inspect --format '{{.State.Health.Status}}' pasalapeli-frontend 2>/dev/null || echo "starting")
-              echo "    [$i/30] Status: $STATUS"
+              echo "    [$i/60] Status: $STATUS"
               if [ "$STATUS" = "healthy" ]; then
                 echo "==> frontend HEALTHY"
                 break
@@ -109,7 +109,7 @@ jobs:
               sleep 5
             done
             if [ "$STATUS" != "healthy" ]; then
-              echo "ERROR: $SERVICE no quedo healthy tras 150s" >&2
+              echo "ERROR: $SERVICE no quedo healthy tras 300s" >&2
               echo "==> docker logs (depuracion):" >&2
               docker logs pasalapeli-frontend 2>&1 | tail -50 >&2 || true
               docker inspect pasalapeli-frontend --format '{{json .State.Health}}' >&2 || true
