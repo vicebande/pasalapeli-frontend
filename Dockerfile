@@ -16,7 +16,7 @@ RUN npm ci
 COPY . .
 # Reemplaza los placeholders de environment.prod.ts y nginx.conf con los valores reales
 RUN sed -i "s|A_PONE_CLIENT_ID|${AZURE_CLIENT_ID}|g; s|A_PONE_TENANT_ID|${AZURE_TENANT_ID}|g; s|A_PONE_REDIRECT_URI|${APP_BASE_URL}|g" src/environments/environment.prod.ts \
-    && sed -i "s|A_PONE_APPS_HOST|${EC2_APPS_HOST}|g" nginx.conf \
+    && sed -i "s|A_PONE_APPS_HOST|${EC2_APPS_HOST}|g; s|bff-service|${EC2_APPS_HOST}|g" nginx.conf \
     && npm run build -- --configuration production
 
 # Stage 2: Serve with Nginx (HTTP) — no-root
