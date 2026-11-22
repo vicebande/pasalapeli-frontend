@@ -222,6 +222,33 @@
   }
 }
 
+/* ---------- Botón de refrescar conexión ---------- */
+
+.btn-recibir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-recibir:hover {
+  background: var(--text-muted);
+  color: var(--bg-card);
+}
+
+.btn-recibir--small {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.65rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-on .live-dot {
     animation: none;

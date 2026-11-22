@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
  * - `connect()`: conexión STOMP pura (sin SockJS) al topic /topic/metrics,
  *   con reconexión automática cada 5 s; emite cada snapshot pushceado.
  * - `conectado$`: estado de la conexión para el badge "En vivo" / "Desconectado".
+ * - `autoConnect()`: conecta automáticamente al iniciar el servicio.
  */
 @Injectable({
   providedIn: 'root'
@@ -57,6 +58,11 @@ export class MetricsService {
    * Llamar una sola vez por vista; `disconnect()` cierra la conexión.
    */
   public connect(): Observable<MetricasSnapshot> {
+    // Si ya hay un cliente pero no está activo, desconecta y vuelve a crear para forzar reconnect
+    if (this.client && !this.client.active) {
+      this.client.deactivate().catch(() => {});
+      this.client = null;
+    }
     if (!this.client) {
       const client = new Client({
         brokerURL: this.wsUrl(),
@@ -80,7 +86,8 @@ export class MetricsService {
       });
       this.client = client;
     }
-    if (!this.client.active) {
+    // Asegurar que el cliente esté activado
+    if (this.client && !this.client.active) {
       this.client.activate();
     }
     return this.snapshots$.asObservable();

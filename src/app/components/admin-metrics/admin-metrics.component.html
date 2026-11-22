@@ -19,6 +19,16 @@
       <span class="live-dot" aria-hidden="true"></span>
       {{ enVivo ? 'En vivo' : 'Desconectado' }}
     </span>
+    <!-- Botón de refrescar conexión -->
+    <button
+      *ngIf="!enVivo"
+      class="btn-recibir btn-recibir--small"
+      (click)="refrescarConexion()"
+      aria-label="Reconectar conexión WebSocket"
+      title="Reconectar conexión WebSocket"
+    >
+      <i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i>
+    </button>
   </div>
 
   <div *ngIf="mensajeError" class="error-banner metrics-error" role="alert" aria-live="assertive">

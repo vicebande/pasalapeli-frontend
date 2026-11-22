@@ -61,12 +61,12 @@ export class AdminMetricsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // Estado de conexión STOMP para el badge "En vivo" / "Desconectado".
+    // Estado de conexión STOMP para el badge "En vivo" / "Desconectado'.
     this.subEstado = this.metricsService.conectado$.subscribe((conectado) => {
       this.enVivo = conectado;
     });
 
-    // Suscripción en vivo a /topic/metrics (reconexión automática).
+    // Suscripción en vivo a /topic/metrics (reconexión automática cada 5 s).
     this.subVivo = this.metricsService.connect().subscribe({
       next: (snapshot) => this.aplicarSnapshot(snapshot)
     });
@@ -87,6 +87,23 @@ export class AdminMetricsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chartProducto?.destroy();
     this.chartProducto = null;
     this.metricsService.disconnect();
+  }
+
+  /** Refresca la conexión WebSocket STOMP (desconecta y vuelve a conectar). */
+  public refrescarConexion(): void {
+    this.metricsService.disconnect();
+    // Resetear estado de UI antes de reconectar
+    this.enVivo = false;
+    this.cargando = true;
+    this.mensajeError = null;
+    // Volver a conectar
+    this.subVivo = this.metricsService.connect().subscribe({
+      next: (snapshot) => this.aplicarSnapshot(snapshot),
+      error: () => {
+        this.mensajeError = 'Error al reconectar la conexión WebSocket.';
+        this.cargando = false;
+      }
+    });
   }
 
   /** Formatea un monto en pesos chilenos (CLP). */
