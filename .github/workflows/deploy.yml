@@ -63,19 +63,13 @@ jobs:
             echo "==> Actualizando archivo .env en EC2 con variables de GitHub"
             ENV_FILE="/opt/pasalapeli/pasalapeli-database/.env"
             
-            # Función para upsert de variables en .env
+            # Función para actualizar variables en .env de forma robusta
             update_env_var() {
               local key="$1" val="$2"
-              if [ -z "$val" ]; then
-                # Si el valor está vacío, comentar o remover la línea
-                if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
-                  sed -i "s|^${key}=.*|# ${key}=# generado por GitHub Actions|" "$ENV_FILE"
-                fi
-                return 0
-              fi
-              if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
-                sed -i "s|^${key}=.*|${key}=${val}|" "$ENV_FILE"
-              else
+              # Remover cualquier línea anterior con esta key (comentarios o valores)
+              sed -i "/^${key}=/d" "$ENV_FILE" 2>/dev/null || true
+              # Añadir nuevo valor al final (solo si no está vacío)
+              if [ -n "$val" ]; then
                 printf '%s=%s\n' "$key" "$val" >> "$ENV_FILE"
               fi
             }
@@ -86,11 +80,12 @@ jobs:
             update_env_var "AZURE_TENANT_ID" "$AZURE_TENANT_ID"
             
             echo "==> Contenido actualizado del .env:"
-            grep -E '^(EC2_APPS_HOST|APP_BASE_URL|AZURE_CLIENT_ID|AZURE_TENANT_ID)=' "$ENV_FILE" || true
+            grep -E '^(EC2_APPS_HOST|APP_BASE_URL|AZURE_CLIENT_ID|AZURE_TENANT_ID)=' "$ENV_FILE" 2>/dev/null || echo "(ninguna clave encontrada)"
             
             # --- REBUILD Y RESTART DOCKER CONTAINER EN EC2 ---
             echo "==> Rebuild y restart contenedor Docker en EC2"
             cd /opt/pasalapeli/pasalapeli-database
+            echo "==> Ejecutando docker compose con .env actualizado"
             docker compose -f docker-compose.web.yml up -d --build
 
             echo "==> Estado de contenedores"
