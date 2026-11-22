@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
@@ -15,7 +15,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 export class AppComponent implements OnInit {
   title = 'Pasa La Peli';
 
-  constructor(private msalService: MsalService) {}
+  constructor(@Optional() private msalService: MsalService) {}
 
   ngOnInit(): void {
     if (environment.azureAd.enabled && this.msalService) {

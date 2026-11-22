@@ -16,7 +16,10 @@ export function loggerCallback(logLevel: LogLevel, message: string) {
   console.log('[MSAL]', message);
 }
 
-export function MSALInstanceFactory(): IPublicClientApplication {
+export function MSALInstanceFactory(): IPublicClientApplication | null {
+  if (!environment.azureAd.enabled) {
+    return null;
+  }
   return new PublicClientApplication({
     auth: {
       clientId: environment.azureAd.clientId,

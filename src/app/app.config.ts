@@ -24,26 +24,32 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi(), withInterceptors([authErrorInterceptor])),
-    {
-      provide: MSAL_INSTANCE,
-      useFactory: MSALInstanceFactory
-    },
-    {
-      provide: MSAL_GUARD_CONFIG,
-      useFactory: MSALGuardConfigFactory
-    },
-    {
-      provide: MSAL_INTERCEPTOR_CONFIG,
-      useFactory: MSALInterceptorConfigFactory
-    },
-    MsalService,
-    MsalGuard,
-    MsalBroadcastService,
-    // El interceptor solo debe inyectar el Bearer token cuando Azure AD está habilitado.
-    // En modo demo, si estuviera activo, intentaría redirigir a login.microsoftonline.com
-    // con un clientId de relleno, rompiendo el flujo de demostración.
+    // Todos los proveedores de MSAL solo se registran cuando Azure AD está habilitado.
+    // En modo demo (HTTP sin HTTPS), PublicClientApplication fallaría con
+    // BrowserAuthError: crypto_nonexistent porque window.crypto.subtle no está disponible.
     ...(environment.azureAd.enabled
-      ? [{ provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true }]
+      ? [
+          {
+            provide: MSAL_INSTANCE,
+            useFactory: MSALInstanceFactory
+          },
+          {
+            provide: MSAL_GUARD_CONFIG,
+            useFactory: MSALGuardConfigFactory
+          },
+          {
+            provide: MSAL_INTERCEPTOR_CONFIG,
+            useFactory: MSALInterceptorConfigFactory
+          },
+          MsalService,
+          MsalGuard,
+          MsalBroadcastService,
+          {
+            provide: HTTP_INTERCEPTORS,
+            useClass: MsalInterceptor,
+            multi: true
+          }
+        ]
       : [])
   ]
 };
