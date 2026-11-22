@@ -62,9 +62,10 @@ export class AdminMetricsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Estado de conexión STOMP para el badge "En vivo" / "Desconectado'.
-    // Usamos conexionConDatos$: solo enVivo=true después de recibir el primer mensaje WS.
-    this.subEstado = this.metricsService.conexionConDatos$.subscribe((conectadoConDatos) => {
-      this.enVivo = conectadoConDatos;
+    // Usamos conectado$: el badge pone enVivo=true cuando el cliente
+    // STOMP está conectado (evento onConnect del broker).
+    this.subEstado = this.metricsService.conectado$.subscribe((conectado) => {
+      this.enVivo = conectado;
     });
 
     // Conexión WebSocket STOMP a /topic/metrics con retry automático.
