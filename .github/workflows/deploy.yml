@@ -41,10 +41,9 @@ jobs:
           terraform_version: 1.6.0
 
       - name: Install yq
-        uses: elementalcy/tool@v1
-        with:
-          name: yq
-          version: latest
+        run: |
+          wget -qO- https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 > /usr/local/bin/yq && \
+          chmod +x /usr/local/bin/yq
 
       - name: Terraform Format
         run: terraform fmt -check -recursive

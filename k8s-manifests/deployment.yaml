@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pasalapeli-frontend
+  namespace: default
+  labels:
+    app: pasalapeli-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pasalapeli-frontend
+  template:
+    metadata:
+      labels:
+        app: pasalapeli-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/pasalapeli-images/frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENVIRONMENT
+              value: "dev"
+          imagePullPolicy: IfNotPresent
