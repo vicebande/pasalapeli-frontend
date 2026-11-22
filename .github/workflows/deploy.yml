@@ -40,7 +40,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 30m
+          command_timeout: 60m
           envs: REPO_OWNER,EC2_APPS_HOST,AZURE_CLIENT_ID,AZURE_TENANT_ID,APP_BASE_URL,EC2_DOMAIN,CERTBOT_EMAIL
           script: |
             set -euo pipefail
