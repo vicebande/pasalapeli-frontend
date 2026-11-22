@@ -75,9 +75,19 @@ jobs:
             sudo apt-get update -y
             sudo apt-get install -y curl git
 
+            # Fetch bootstrap script from the main branch of pasalapeli-database repo
             curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/pasalapeli-database/main/scripts/bootstrap-web.sh" -o /tmp/bootstrap-web.sh
+            if [ $? -ne 0 ]; then
+              echo "ERROR: No se pudo descargar bootstrap-web.sh. Verifica que REPO_OWNER es correcto y el archivo existe en main." >&2
+              exit 1
+            fi
             chmod +x /tmp/bootstrap-web.sh
             bash /tmp/bootstrap-web.sh
+
+            if [ $? -ne 0 ]; then
+              echo "ERROR: El bootstrap-script fallo. Revisa los logs arriba." >&2
+              exit 1
+            fi
 
             echo "==> Pulling latest code"
             cd /opt/pasalapeli/pasalapeli-frontend
