@@ -10,6 +10,6 @@ export const environment = {
     redirectUri: 'A_PONE_REDIRECT_URI',
     postLogoutRedirectUri: 'A_PONE_REDIRECT_URI',
     scopes: ['openid', 'profile', 'email', 'api://pasalapeli-api/access_as_user'],
-    enabled: true
+    enabled: false
   }
 };
