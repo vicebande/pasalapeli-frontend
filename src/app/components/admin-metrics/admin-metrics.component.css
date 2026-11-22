@@ -1,0 +1,229 @@
+/* =========================================================
+   Dashboard de métricas en vivo.
+
+   Reutiliza las clases visuales del panel admin (admin-card,
+   card-header, stats-row, stat-box, stat-num, stat-label).
+   Están definidas en admin.component.css y Angular aplica
+   encapsulación emulada, así que se reimplementan aquí con el
+   mismo look. ORDEN IMPORTANTE: primero las bases y después las
+   variantes propias (.metrics-*, .stat-box-main), porque tienen
+   la misma especificidad y gana la última regla.
+   ========================================================= */
+
+/* ---------- Bases (idénticas a admin.component.css) ---------- */
+
+.admin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.75rem;
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.card-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-header p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.stat-box {
+  background: rgba(41, 43, 54, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Texto secundario (equivalente a .hint-text de admin.component.css) */
+.hint-text {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ---------- Sección y cabecera ---------- */
+
+.metrics-section {
+  margin-top: 2rem;
+}
+
+.metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metrics-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metrics-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Badge de estado en vivo ---------- */
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.live-on {
+  background-color: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.live-on .live-dot {
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+  animation: pulso-vivo 1.6s ease-in-out infinite;
+}
+
+.live-off {
+  background-color: rgba(246, 68, 68, 0.16);
+  color: #ff6b6b;
+  border: 1px solid rgba(246, 68, 68, 0.35);
+}
+
+@keyframes pulso-vivo {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.75); }
+}
+
+/* ---------- Variantes del dashboard (van después de las bases) ---------- */
+
+.metrics-error {
+  margin-bottom: 1.25rem;
+}
+
+.metrics-stats {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 0;
+}
+
+.stat-box-main {
+  background: linear-gradient(180deg, rgba(255, 183, 0, 0.12), rgba(41, 43, 54, 0.6));
+  border-color: rgba(255, 183, 0, 0.4);
+}
+
+.stat-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.metrics-empty {
+  padding: 2.5rem 1rem 1.5rem;
+}
+
+.metrics-empty .empty-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.metrics-empty .hint-text {
+  margin-top: 0.35rem;
+}
+
+/* ---------- Gráficos ---------- */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 280px;
+}
+
+.chart-empty {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .chart-wrap {
+    height: 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-on .live-dot {
+    animation: none;
+  }
+}

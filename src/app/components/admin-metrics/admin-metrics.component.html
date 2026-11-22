@@ -1,0 +1,93 @@
+<section class="metrics-section" aria-label="Métricas de ventas en tiempo real">
+  <div class="metrics-header">
+    <div>
+      <h3>
+        <i class="fa-solid fa-chart-line text-accent" aria-hidden="true"></i> Métricas de Ventas en Tiempo Real
+      </h3>
+      <p>Ventas del día actualizadas al instante desde el BFF (WebSocket STOMP).</p>
+    </div>
+
+    <!-- Badge de estado de conexión: En vivo / Desconectado -->
+    <span
+      class="badge live-badge"
+      [class.live-on]="enVivo"
+      [class.live-off]="!enVivo"
+      role="status"
+      aria-live="polite"
+      [attr.aria-label]="enVivo ? 'Conexión en vivo activa' : 'Conexión desconectada, reintentando'"
+    >
+      <span class="live-dot" aria-hidden="true"></span>
+      {{ enVivo ? 'En vivo' : 'Desconectado' }}
+    </span>
+  </div>
+
+  <div *ngIf="mensajeError" class="error-banner metrics-error" role="alert" aria-live="assertive">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+    <span>{{ mensajeError }}</span>
+  </div>
+
+  <div *ngIf="cargando" class="loading-box">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Cargando métricas de ventas...</p>
+  </div>
+
+  <!-- Fila superior: total vendido hoy + datos de apoyo -->
+  <div *ngIf="snapshot" class="stats-row metrics-stats" aria-label="Resumen de ventas de hoy">
+    <div class="stat-box stat-box-main">
+      <span class="stat-num">{{ formatearClp(snapshot.totalHoy) }}</span>
+      <span class="stat-label">Vendido hoy</span>
+      <span class="stat-sub">{{ snapshot.cantidadHoy }} venta{{ snapshot.cantidadHoy === 1 ? '' : 's' }}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num">{{ snapshot.porMinuto.length }}</span>
+      <span class="stat-label">Minutos con ventas</span>
+      <span class="stat-sub">Actualizado {{ snapshot.timestamp | date: 'HH:mm:ss' }}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num">{{ snapshot.topProductos.length }}</span>
+      <span class="stat-label">Productos en el top</span>
+      <span class="stat-sub">{{ enVivo ? 'Sincronizado en vivo' : 'Último snapshot recibido' }}</span>
+    </div>
+  </div>
+
+  <!-- Estado vacío amigable cuando todavía no hay ventas -->
+  <div *ngIf="snapshot && snapshot.cantidadHoy === 0" class="empty-box metrics-empty" role="status">
+    <i class="fa-solid fa-film empty-icon" aria-hidden="true"></i>
+    <p>Aún no hay ventas registradas hoy</p>
+    <p class="hint-text">Los gráficos se actualizarán solos en cuanto entre la primera venta.</p>
+  </div>
+
+  <div class="metrics-grid">
+    <!-- Chart de líneas: ventas por minuto -->
+    <article class="admin-card">
+      <div class="card-header">
+        <h4>
+          <i class="fa-solid fa-wave-square text-gold" aria-hidden="true"></i> Ventas por minuto
+        </h4>
+        <p>Monto vendido (CLP) en cada minuto con actividad.</p>
+      </div>
+      <div class="chart-wrap">
+        <canvas #chartMinutoCanvas role="img" aria-label="Gráfico de línea de ventas por minuto"></canvas>
+      </div>
+      <p *ngIf="snapshot && snapshot.porMinuto.length === 0" class="chart-empty">
+        Sin minutos con ventas registradas todavía.
+      </p>
+    </article>
+
+    <!-- Chart de barras: productos más vendidos -->
+    <article class="admin-card">
+      <div class="card-header">
+        <h4>
+          <i class="fa-solid fa-ranking-star text-accent" aria-hidden="true"></i> Productos más vendidos
+        </h4>
+        <p>Unidades vendidas por producto (el monto aparece al pasar el cursor).</p>
+      </div>
+      <div class="chart-wrap">
+        <canvas #chartProductoCanvas role="img" aria-label="Gráfico de barras de productos más vendidos"></canvas>
+      </div>
+      <p *ngIf="snapshot && snapshot.topProductos.length === 0" class="chart-empty">
+        Sin productos vendidos todavía.
+      </p>
+    </article>
+  </div>
+</section>

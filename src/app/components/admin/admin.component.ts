@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { Pelicula, PeliculaRequest } from '../../models/pelicula.model';
 import { Funcion, FuncionRequest } from '../../models/funcion.model';
 import { AdminMensajeriaComponent } from '../admin-mensajeria/admin-mensajeria.component';
+import { AdminMetricsComponent } from '../admin-metrics/admin-metrics.component';
 
 interface ConfirmacionState {
   titulo: string;
@@ -17,7 +18,7 @@ interface ConfirmacionState {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminMensajeriaComponent],
+  imports: [CommonModule, FormsModule, AdminMetricsComponent, AdminMensajeriaComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })
