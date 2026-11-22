@@ -58,13 +58,12 @@ jobs:
             echo "==> Archivos generados en dist/pasa-la-peli-frontend/browser"
             ls -la dist/pasa-la-peli-frontend/browser
 
-            # --- DEPLOY ARCHIVOS ESTÁTICOS A EC2 ---
-            echo "==> Desplegando archivos estáticos a EC2"
+            # --- REBUILD Y RESTART DOCKER CONTAINER EN EC2 ---
+            echo "==> Rebuild y restart contenedor Docker en EC2"
+            cd /opt/pasalapeli/pasalapeli-database
+            docker compose -f docker-compose.web.yml up -d --build
 
-            # Copiar files estáticos a la EC2 (sobreescribe lo que esté en nginx)
-            scp -i /home/appleboy/.ssh/known_hosts -o StrictHostKeyChecking=no -r dist/pasa-la-peli-frontend/browser/* ec2-user@${{ secrets.EC2_HOST }}:/usr/share/nginx/html/
-
-            # Reiniciar nginx para cargar los nuevos files
-            ssh ec2-user@${{ secrets.EC2_HOST }} "nginx -s reload"
+            echo "==> Estado de contenedores"
+            docker compose -f docker-compose.web.yml ps
 
             echo "==> Deploy completado exitoso"
