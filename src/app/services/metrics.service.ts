@@ -26,9 +26,13 @@ export class MetricsService {
   private readonly snapshots$ = new Subject<MetricasSnapshot>();
   /** Estado de la conexión STOMP (true = conectado). */
   private readonly conexion$ = new BehaviorSubject<boolean>(false);
+  /** Conexión establecida y primer mensaje recibido desde /topic/metrics. */
+  private readonly conexionConDatos$ = new BehaviorSubject<boolean>(false);
 
   /** Estado de conexión STOMP observable para la UI. */
   public readonly conectado$: Observable<boolean> = this.conexion$.asObservable();
+  /** Observable de conexión con datos (primer mensaje WS recibido). */
+  public readonly conexionConDatos$: Observable<boolean> = this.conexionConDatos$.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -74,15 +78,28 @@ export class MetricsService {
             try {
               const snapshot = JSON.parse(message.body) as MetricasSnapshot;
               // Fuera de Angular zone: reenrutar para que la UI se actualice.
-              this.zone.run(() => this.snapshots$.next(snapshot));
+              this.zone.run(() => {
+                this.snapshots$.next(snapshot);
+                // Primer mensaje recibido: marcar que la conexión tiene datos
+                this.conexionConDatos$.next(true);
+              });
             } catch {
               // Mensaje malformado: se ignora sin tumbar la conexión.
             }
           });
         },
-        onDisconnect: () => this.zone.run(() => this.conexion$.next(false)),
-        onWebSocketClose: () => this.zone.run(() => this.conexion$.next(false)),
-        onStompError: () => this.zone.run(() => this.conexion$.next(false))
+        onDisconnect: () => this.zone.run(() => {
+          this.conexion$.next(false);
+          this.conexionConDatos$.next(false);
+        }),
+        onWebSocketClose: () => this.zone.run(() => {
+          this.conexion$.next(false);
+          this.conexionConDatos$.next(false);
+        }),
+        onStompError: () => this.zone.run(() => {
+          this.conexion$.next(false);
+          this.conexionConDatos$.next(false);
+        })
       });
       this.client = client;
     }
@@ -98,6 +115,7 @@ export class MetricsService {
     const cliente = this.client;
     this.client = null;
     this.conexion$.next(false);
+    this.conexionConDatos$.next(false);
     if (cliente) {
       cliente.deactivate().catch(() => {
         // Error al cerrar el socket: la conexión ya queda marcada como caída.

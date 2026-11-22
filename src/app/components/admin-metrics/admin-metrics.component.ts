@@ -62,14 +62,29 @@ export class AdminMetricsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Estado de conexión STOMP para el badge "En vivo" / "Desconectado'.
-    this.subEstado = this.metricsService.conectado$.subscribe((conectado) => {
-      this.enVivo = conectado;
+    // Usamos conexionConDatos$: solo enVivo=true después de recibir el primer mensaje WS.
+    this.subEstado = this.metricsService.conexionConDatos$.subscribe((conectadoConDatos) => {
+      this.enVivo = conectadoConDatos;
     });
 
-    // Suscripción en vivo a /topic/metrics (reconexión automática cada 5 s).
-    this.subVivo = this.metricsService.connect().subscribe({
-      next: (snapshot) => this.aplicarSnapshot(snapshot)
-    });
+    // Conexión WebSocket STOMP a /topic/metrics con retry automático.
+    // Se retrasa 1s para asegurar que el snapshot REST ya esté cargado.
+    setTimeout(() => {
+      this.subVivo = this.metricsService.connect().subscribe({
+        next: (snapshot) => this.aplicarSnapshot(snapshot),
+        error: () => {
+          // Intento de reconexión después de 3 s si falla el primer connect.
+          setTimeout(() => {
+            this.subVivo = this.metricsService.connect().subscribe({
+              next: (snapshot) => this.aplicarSnapshot(snapshot),
+              error: () => {
+                this.mensajeError = 'No se pudo establecer la conexión en tiempo real. Los datos se actualizan por cada compra.';
+              }
+            });
+          }, 3000);
+        }
+      });
+    }, 1000);
   }
 
   public ngAfterViewInit(): void {
