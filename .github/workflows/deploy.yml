@@ -58,37 +58,56 @@ jobs:
             echo "==> Archivos generados en dist/pasa-la-peli-frontend/browser"
             ls -la dist/pasa-la-peli-frontend/browser
 
-            # --- ACTUALIZAR .env EN EC2 CON VALORES DE GITHUB VARIABLES ---
-            # Esto asegura que el docker build use los ARG correctos (sobreescribe .env)
-            echo "==> Actualizando archivo .env en EC2 con variables de GitHub"
-            ENV_FILE="/opt/pasalapeli/pasalapeli-database/.env"
-            
-            # Función para actualizar variables en .env de forma robusta
-            update_env_var() {
-              local key="$1" val="$2"
-              # Remover cualquier línea anterior con esta key (comentarios o valores)
-              sed -i "/^${key}=/d" "$ENV_FILE" 2>/dev/null || true
-              # Añadir nuevo valor al final (solo si no está vacío)
-              if [ -n "$val" ]; then
-                printf '%s=%s\n' "$key" "$val" >> "$ENV_FILE"
-              fi
-            }
-            
-            update_env_var "EC2_APPS_HOST" "$EC2_APPS_HOST"
-            update_env_var "APP_BASE_URL" "$APP_BASE_URL"
-            update_env_var "AZURE_CLIENT_ID" "$AZURE_CLIENT_ID"
-            update_env_var "AZURE_TENANT_ID" "$AZURE_TENANT_ID"
-            
-            echo "==> Contenido actualizado del .env:"
-            grep -E '^(EC2_APPS_HOST|APP_BASE_URL|AZURE_CLIENT_ID|AZURE_TENANT_ID)=' "$ENV_FILE" 2>/dev/null || echo "(ninguna clave encontrada)"
-            
-            # --- REBUILD Y RESTART DOCKER CONTAINER EN EC2 ---
-            echo "==> Rebuild y restart contenedor Docker en EC2"
+            # --- DEPLOY A EC2 USANDO bootstrap-web.sh ---
+            # Este script instala Docker, genera certificados, configura .env,
+            # y levanta el contenedor nginx con la config correcta.
+            echo "==> Descargando bootstrap-web.sh desde pasalapeli-database"
+            curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/pasalapeli-database/main/scripts/bootstrap-web.sh" -o /tmp/bootstrap-web.sh
+            if [ $? -ne 0 ]; then
+              echo "ERROR: No se pudo descargar bootstrap-web.sh. Verifica que REPO_OWNER es correcto y el archivo existe en main." >&2
+              exit 1
+            fi
+            chmod +x /tmp/bootstrap-web.sh
+
+            echo "==> Ejecutando bootstrap-web.sh en EC2"
+            bash /tmp/bootstrap-web.sh
+
+            if [ $? -ne 0 ]; then
+              echo "ERROR: El bootstrap-script fallo. Revisa los logs arriba." >&2
+              exit 1
+            fi
+
+            echo "==> Pulling latest code del repo frontend en EC2"
+            cd /opt/pasalapeli/pasalapeli-frontend
+            git fetch --prune origin
+            git reset --hard origin/main
+
+            echo "==> Build and restart frontend container"
             cd /opt/pasalapeli/pasalapeli-database
-            echo "==> Ejecutando docker compose con .env actualizado"
-            docker compose -f docker-compose.web.yml up -d --build
+            EC2_APPS_HOST="$EC2_APPS_HOST" AZURE_CLIENT_ID="$AZURE_CLIENT_ID" AZURE_TENANT_ID="$AZURE_TENANT_ID" APP_BASE_URL="$APP_BASE_URL" docker compose -f docker-compose.web.yml up -d --build
 
-            echo "==> Estado de contenedores"
-            docker compose -f docker-compose.web.yml ps
+            echo "==> Waiting for health check..."
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format '{{.State.Health.Status}}' pasalapeli-frontend 2>/dev/null || echo "starting")
+              echo "    [$i/30] Status: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                echo "==> frontend HEALTHY"
+                break
+              fi
+              sleep 5
+            done
+            if [ "$STATUS" != "healthy" ]; then
+              echo "ERROR: frontend no quedo healthy tras 150s" >&2
+              echo "==> docker logs (depuracion):" >&2
+              docker logs pasalapeli-frontend 2>&1 | tail -50 >&2 || true
+              docker inspect pasalapeli-frontend --format '{{json .State.Health}}' >&2 || true
+              exit 1
+            fi
 
+            echo "==> Verificando HTTPS"
+            if [ -n "$EC2_DOMAIN" ]; then
+              curl -fsS -o /dev/null -w "https://$EC2_DOMAIN -> %{http_code}\n" "https://$EC2_DOMAIN/" || echo "WARN: HTTPS no responde aun"
+            fi
+
+            docker compose -f docker-compose.web.yml ps pasalapeli-frontend
             echo "==> Deploy completado exitoso"
