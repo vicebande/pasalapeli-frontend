@@ -37,7 +37,7 @@
           },
           "configurations": {
             "production": {
-              "budgets": null,
+              "budgets": [],
               "outputHashing": "all",
               "fileReplacements": [
                 {
