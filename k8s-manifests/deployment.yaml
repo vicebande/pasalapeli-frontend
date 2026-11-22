@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/pasalapeli-images/frontend:latest
+          image: 439738332704.dkr.ecr.us-east-1.amazonaws.com/pasalapeli-images/frontend:latest
           ports:
             - containerPort: 80
           env:
