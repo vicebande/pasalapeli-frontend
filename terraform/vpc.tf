@@ -1,5 +1,15 @@
 # VPC and Network Configuration
 
+# Data source for availability zones
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+# Data source for private subnet IDs
+data "aws_subnet_ids" "private" {
+  vpc_id = aws_vpc.main.id
+}
+
 # VPC
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
@@ -64,7 +74,6 @@ resource "aws_nat_gateway" "nat" {
 
 # EIP for NAT Gateway
 resource "aws_eip" "nat" {
-  vpc_id = aws_vpc.main.id
   tags = {
     Environment = var.environment_name
     Name        = "pasalapeli-nat-eip"

@@ -16,25 +16,33 @@ resource "kubernetes_deployment" "frontend" {
       }
     }
 
-    template_label = "app = pasalapeli-frontend"
-
-    container {
-      image = "${aws_ecr_repository.frontend.repository_url}/frontend:latest"
-      name    = "frontend"
-
-      ports {
-        container_port = 80
+    template {
+      metadata {
+        labels = {
+          app = "pasalapeli-frontend"
+        }
       }
 
-      env {
-        name = "ENVIRONMENT"
-        value = var.environment_name
+      spec {
+        container {
+          image = "${aws_ecr_repository.frontend.repository_url}/frontend:latest"
+          name    = "frontend"
+
+          port {
+            container_port = 80
+          }
+
+          env {
+            name = "ENVIRONMENT"
+            value = var.environment_name
+          }
+        }
       }
     }
   }
 }
 
-# Frontend Service
+# Frontend Service (type will be set via kubectl or default)
 resource "kubernetes_service" "frontend" {
   metadata {
     name      = "pasalapeli-frontend-service"
@@ -48,8 +56,6 @@ resource "kubernetes_service" "frontend" {
       port = 80
       target_port = 80
     }
-
-    type = LoadBalancer
   }
 }
 
@@ -67,7 +73,5 @@ resource "kubernetes_service" "db" {
       port = 3306
       target_port = 3306
     }
-
-    type = ClusterIP
   }
 }

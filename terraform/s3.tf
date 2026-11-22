@@ -1,23 +1,26 @@
 # S3 Buckets
+
+# S3 bucket for website static
 resource "aws_s3_bucket" "website" {
   bucket = "pasalapeli-website-static"
   acl    = "private"
-  
+
   versioning {
     enabled = true
   }
-  
+
   website {
     index_document = "index.html"
     error_document = "error.html"
   }
-  
+
   lifecycle_rule {
+    enabled     = true
     expiration {
       days = 365
     }
   }
-  
+
   tags = {
     Environment = var.environment_name
     Name        = "pasalapeli-website"
@@ -28,11 +31,11 @@ resource "aws_s3_bucket" "website" {
 resource "aws_s3_bucket" "tfstate" {
   bucket = "pasalapeli-tfstate"
   acl    = "private"
-  
+
   versioning {
     enabled = true
   }
-  
+
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
@@ -40,13 +43,14 @@ resource "aws_s3_bucket" "tfstate" {
       }
     }
   }
-  
+
   lifecycle_rule {
+    enabled     = true
     expiration {
       days = 3650
     }
   }
-  
+
   tags = {
     Environment = var.environment_name
     Name        = "pasalapeli-tfstate"
@@ -57,17 +61,18 @@ resource "aws_s3_bucket" "tfstate" {
 resource "aws_s3_bucket" "uploads" {
   bucket = "pasalapeli-uploads"
   acl    = "private"
-  
+
   versioning {
     enabled = true
   }
-  
+
   lifecycle_rule {
+    enabled     = true
     expiration {
       days = 365
     }
   }
-  
+
   tags = {
     Environment = var.environment_name
     Name        = "pasalapeli-uploads"
