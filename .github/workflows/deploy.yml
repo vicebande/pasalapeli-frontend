@@ -1,4 +1,4 @@
-name: Deploy a EKS
+name: Deploy frontend a EKS
 
 on:
   push:
@@ -21,54 +21,46 @@ jobs:
         with:
           args: -Dsonar.qualitygate.wait=true
 
-  terraform:
-    name: Terraform Infrastructure
+  deploy:
+    name: Deploy frontend to EKS
     needs: quality
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-      TF_VAR_environment_name: dev
-      TF_VAR_domain_name: pasalapeli-frontend
+      AWS_REGION: us-east-1
+      CLUSTER_NAME: pasalapeli-cluster
+      ECR_IMAGE: 439738332704.dkr.ecr.us-east-1.amazonaws.com/pasalapeli-images/frontend:latest
+      DEPLOYMENT_NAME: pasalapeli-frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          terraform_version: 1.6.0
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
 
-      - name: Install yq
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image (production configuration)
         run: |
-          wget -qO- https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 > /usr/local/bin/yq && \
-          chmod +x /usr/local/bin/yq
+          docker build \
+            --build-arg AZURE_CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}" \
+            --build-arg AZURE_TENANT_ID="${{ secrets.AZURE_TENANT_ID }}" \
+            --build-arg APP_BASE_URL="${{ secrets.APP_BASE_URL }}" \
+            --build-arg EC2_APPS_HOST=pasalapeli-bff-service \
+            -t $ECR_IMAGE .
+          docker push $ECR_IMAGE
 
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
-        working-directory: terraform
-
-      - name: Terraform Init
-        run: terraform init -backend=true -backend-config="bucket=pasalapeli-tfstate" -backend-config="key=pasalapeli-frontend/terraform.tfstate" -backend-config="region=us-east-1" -input=false
-        working-directory: terraform
-
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: terraform
-
-      - name: Terraform Plan
-        run: terraform plan -no-color
-        working-directory: terraform
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
-        working-directory: terraform
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION
 
       - name: Deploy to EKS
-        if: success()
         run: |
-          echo "🚀 Deploying to EKS..."
-          aws eks update-kubeconfig --name pasalapeli-cluster --region us-east-1
           kubectl apply -f k8s-manifests/
+          kubectl rollout restart deployment/$DEPLOYMENT_NAME
+          kubectl rollout status deployment/$DEPLOYMENT_NAME --timeout=180s
