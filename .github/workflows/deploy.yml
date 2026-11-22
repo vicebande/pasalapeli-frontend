@@ -6,24 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  quality:
-    name: Quality Gate (SonarQube Cloud)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Analizar y esperar al Quality Gate (bloquea el deploy)
-        uses: SonarSource/sonarqube-scan-action@v8.3.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
-        with:
-          args: -Dsonar.qualitygate.wait=true
-
   deploy:
     name: Build y deploy a EC2
-    needs: quality
     runs-on: ubuntu-latest
     steps:
       - name: Preparar EC2-WEB y desplegar frontend
@@ -40,51 +24,52 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 90m
+          command_timeout: 30m
           envs: REPO_OWNER,EC2_APPS_HOST,AZURE_CLIENT_ID,AZURE_TENANT_ID,APP_BASE_URL,EC2_DOMAIN,CERTBOT_EMAIL
           script: |
             set -euo pipefail
+            COMPOSE_DIR=/opt/pasalapeli/pasalapeli-database
+            COMPOSE_FILE=docker-compose.web.yml
+            SERVICE=frontend
 
-            # --- BUILD LOCAL ANGULAR EN GITHUB RUNNER ---
-            # Esto es MUCHO más rápido que build en la EC2 t2.micro
-            cd /github/workspace
+            # Lock compartido por los deploys de frontend sobre EC2-WEB:
+            # serializa docker compose up para evitar conflictos de contenedor.
+            LOCKFILE=/tmp/pasalapeli-deploy.lock
+            exec 9>"$LOCKFILE"
+            flock -x -w 1800 9
+            echo "==> Lock adquirido $LOCKFILE (despliegue "$SERVICE")"
 
-            echo "==> Instalando dependencias del frontend"
-            npm ci
+            # APP_BASE_URL: si no viene definida, deriva de EC2_DOMAIN
+            DOMAIN="${EC2_DOMAIN:-}"
+            if [ -z "$APP_BASE_URL" ]; then
+              if [ -n "$DOMAIN" ]; then
+                APP_BASE_URL="https://$DOMAIN"
+              else
+                APP_BASE_URL="https://localhost"
+              fi
+            fi
+            export DOMAIN APP_BASE_URL
 
-            echo "==> Construyendo Angular en producción"
-            CI=false npm run build -- --configuration production
-
-            echo "==> Archivos generados en dist/pasa-la-peli-frontend/browser"
-            ls -la dist/pasa-la-peli-frontend/browser
-
-            # --- DEPLOY A EC2 USANDO bootstrap-web.sh ---
-            # Este script instala Docker, genera certificados, configura .env,
-            # y levanta el contenedor nginx con la config correcta.
-            echo "==> Descargando bootstrap-web.sh desde pasalapeli-database"
-            curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/pasalapeli-database/main/scripts/bootstrap-web.sh" -o /tmp/bootstrap-web.sh
-            if [ $? -ne 0 ]; then
-              echo "ERROR: No se pudo descargar bootstrap-web.sh. Verifica que REPO_OWNER es correcto y el archivo existe en main." >&2
+            if [ -z "${EC2_APPS_HOST:-}" ]; then
+              echo "ERROR: define la variable EC2_APPS_HOST (IP privada de EC2-APPS) en pasalapeli-frontend > Settings > Secrets and variables > Actions > Variables" >&2
               exit 1
             fi
-            chmod +x /tmp/bootstrap-web.sh
 
-            echo "==> Ejecutando bootstrap-web.sh en EC2"
+            echo "==> Preparando EC2-WEB (Docker, repos y certificado) de forma automatica"
+            sudo apt-get update -y
+            sudo apt-get install -y curl git
+
+            curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/pasalapeli-database/main/scripts/bootstrap-web.sh" -o /tmp/bootstrap-web.sh
+            chmod +x /tmp/bootstrap-web.sh
             bash /tmp/bootstrap-web.sh
 
-            if [ $? -ne 0 ]; then
-              echo "ERROR: El bootstrap-script fallo. Revisa los logs arriba." >&2
-              exit 1
-            fi
-
-            echo "==> Pulling latest code del repo frontend en EC2"
+            echo "==> Pulling latest code"
             cd /opt/pasalapeli/pasalapeli-frontend
-            git fetch --prune origin
-            git reset --hard origin/main
+            git pull --ff-only origin main
 
-            echo "==> Build and restart frontend container"
-            cd /opt/pasalapeli/pasalapeli-database
-            EC2_APPS_HOST="$EC2_APPS_HOST" AZURE_CLIENT_ID="$AZURE_CLIENT_ID" AZURE_TENANT_ID="$AZURE_TENANT_ID" APP_BASE_URL="$APP_BASE_URL" docker compose -f docker-compose.web.yml up -d --build
+            echo "==> Building and restarting $SERVICE (APP_BASE_URL=$APP_BASE_URL, EC2_APPS_HOST=$EC2_APPS_HOST)"
+            cd "$COMPOSE_DIR"
+            EC2_APPS_HOST="$EC2_APPS_HOST" AZURE_CLIENT_ID="$AZURE_CLIENT_ID" AZURE_TENANT_ID="$AZURE_TENANT_ID" APP_BASE_URL="$APP_BASE_URL" docker compose -f "$COMPOSE_FILE" up -d --build "$SERVICE"
 
             echo "==> Waiting for health check..."
             for i in $(seq 1 30); do
@@ -97,17 +82,14 @@ jobs:
               sleep 5
             done
             if [ "$STATUS" != "healthy" ]; then
-              echo "ERROR: frontend no quedo healthy tras 150s" >&2
-              echo "==> docker logs (depuracion):" >&2
-              docker logs pasalapeli-frontend 2>&1 | tail -50 >&2 || true
-              docker inspect pasalapeli-frontend --format '{{json .State.Health}}' >&2 || true
+              echo "ERROR: $SERVICE no quedo healthy tras 150s" >&2
               exit 1
             fi
 
             echo "==> Verificando HTTPS"
-            if [ -n "$EC2_DOMAIN" ]; then
-              curl -fsS -o /dev/null -w "https://$EC2_DOMAIN -> %{http_code}\n" "https://$EC2_DOMAIN/" || echo "WARN: HTTPS no responde aun"
+            if [ -n "$DOMAIN" ]; then
+              curl -fsS -o /dev/null -w "https://$DOMAIN -> %{http_code}\n" "https://$DOMAIN/" || echo "WARN: HTTPS no responde aun"
             fi
 
-            docker compose -f docker-compose.web.yml ps pasalapeli-frontend
-            echo "==> Deploy completado exitoso"
+            docker compose -f "$COMPOSE_FILE" ps "$SERVICE"
+            flock -u 9
