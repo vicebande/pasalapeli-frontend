@@ -1,76 +1,45 @@
-# 💻 Pasa La Peli - Frontend (Angular SPA + MSAL)
+# pasalapeli-frontend (Angular SPA + EKS)
 
-Aplicación web Single Page Application (SPA) para clientes y administradores del cine, con diseño responsive de temática oscura y autenticación federada con **Microsoft Azure Active Directory (MSAL)**.
-
----
+Aplicación web Single Page Application (SPA) para clientes y administradores del cine, con autenticación federada con **Microsoft Azure Active Directory (MSAL)**. Despliega sobre **EKS (Kubernetes gestionado)** como un Deployment con Service tipo `LoadBalancer`.
 
 ## 🚀 Tecnologías
-- **Angular 18**
-- **TypeScript 5.5**
-- **Microsoft Authentication Library:** `@azure/msal-browser` y `@azure/msal-angular`
-- **FontAwesome 6.5** y fuentes modernas Google
-- **Nginx & Dockerfile** (para despliegue en contenedor)
+- Angular 18, TypeScript 5.5
+- `@azure/msal-browser` + `@azure/msal-angular`
+- Nginx (serve SPA + proxy)
+- Docker, Kubernetes (EKS)
 
----
+## ☁️ Despliegue CI/CD (GitHub Actions → Terraform → EKS)
 
-## 🔐 Integración MSAL
-- **`msal.config.ts`**: Configuración de `PublicClientApplication`, redirecciones y caché local.
-- **`MsalGuard`**: Protege rutas sensibles (compras, historial de tickets y panel admin).
-- **`MsalInterceptor`**: Inyecta automáticamente el token Bearer JWT en las peticiones dirigidas al BFF (proxy `/api` de Nginx).
-- **Modo Demostración / Toggle de Roles**: Incluye un switch visual en la barra superior para alternar entre perfil `CLIENTE` y `ADMIN` durante pruebas sin requerir una cuenta de Azure AD.
+Este repositorio solo despliega su **carga de trabajo en EKS**. La infraestructura compartida (VPC, EKS, RDS, S3, ECR, etc.) es propietaria del repo [`pasalapeli-database`](./../pasalapeli-database) y debe desplegarse **antes** que este servicio.
 
----
+Workflow `.github/workflows/deploy.yml` en cada `push` a `main`:
+1. Quality Gate: SonarCloud (bloquea si falla).
+2. Terraform Init: backend S3 `pasalapeli-tfstate` (`pasalapeli-frontend/terraform.tfstate`).
+3. Terraform Format / Validate / Plan / Apply.
+4. `aws eks update-kubeconfig --name pasalapeli-cluster --region us-east-1`
+5. `kubectl apply -f k8s-manifests/` (Deployment + Service tipo LoadBalancer)
 
-## 🖥️ Vistas Principales
-1. **Cartelera (`/cartelera`):** Explorador de películas en cartelera con buscador interactivo y fichas de detalle.
-2. **Detalle de Película (`/pelicula/:id`):** Horarios, salas y cupos en vivo.
-3. **Modal de Compra:** Selección de número de entradas, cálculo de monto, método de pago, confirmación de compra y manejo visual del código **HTTP 409 Conflict** en caso de que se agoten los cupos.
-4. **Ticket Digital:** Comprobante con código único y código QR simulado.
-5. **Mis Tickets (`/mis-tickets`):** Historial de compras del usuario autenticado.
-6. **Panel de Administración (`/admin`):** Formulario para registrar nuevas películas con subida de portadas al **almacenamiento local**, programación de nuevas funciones y administración de la **mensajería** (destinos y reglas de distribución).
-7. **Campana de Notificaciones (navbar):** Icono con **contador de no leídas**; al hacer clic abre la **bandeja (inbox)** con las notificaciones del usuario (películas nuevas, compras y devoluciones) y permite marcarlas como leídas.
+### Kubernetes manifests (`k8s-manifests/`)
+- `deployment.yaml`: Deployment `pasalapeli-frontend` (1 réplica, contenedor en puerto 80).
+- `service.yaml`: Service `pasalapeli-frontend-service` tipo `LoadBalancer` (puerto 80 → 80).
 
----
-
-## 🛠️ Ejecución Local
-```bash
-npm install
-npm start
-# Abre en http://localhost:4200
-```
-O con Docker y Nginx:
-```bash
-docker build -t frontend-pasalapeli .
-docker run -p 80:80 frontend-pasalapeli
-```
-
----
-
-## ☁️ Despliegue CI/CD (GitHub Actions → EC2)
-
-Este repo se despliega sobre una instancia **EC2 (Ubuntu 24.04)** que ya porta el stack completo. El orquestador vive en el repo [`pasalapeli-database`](https://github.com) (contiene el `docker-compose.yml` global en `/opt/pasalapeli/`).
-
-### Workflow `.github/workflows/deploy.yml`
-En cada `push` a `main`:
-1. SSH al EC2 (acción `appleboy/ssh-action`).
-2. `git pull` del código del frontend en `/opt/pasalapeli/pasalapeli-frontend`.
-3. `docker compose up -d --build frontend`.
-4. Verifica HTTPS y el estado `healthy` del contenedor.
-
-### GitHub Secrets requeridos en este repo
+### GitHub Secrets requeridos
 | Secret | Descripción |
 |---|---|
-| `EC2_HOST` | IP pública del EC2 |
-| `EC2_USER` | Usuario SSH (usualmente `ubuntu`) |
-| `EC2_SSH_KEY` | Clave privada SSH (.pem) |
+| `AWS_ACCESS_KEY_ID` | Credencial AWS |
+| `AWS_SECRET_ACCESS_KEY` | Secreto asociado |
+| `AWS_SESSION_TOKEN` | Token de sesión (credenciales temporales STS) |
+| `SONAR_TOKEN` | Token de SonarCloud |
+| `SONAR_HOST_URL` | `https://sonarcloud.io` |
 
-### Variables de entorno en producción (definidas en el `.env` del orquestador)
-Los valores de Azure AD se inyectan al **build** como argumentos Docker (no son secretos; un *Public Client* de MSAL los expone igualmente):
-- `AZURE_CLIENT_ID` → `ARG AZURE_CLIENT_ID` (build)
-- `AZURE_TENANT_ID` → `ARG AZURE_TENANT_ID` (build)
-- `APP_BASE_URL=https://<tu-dominio>` → `ARG APP_BASE_URL` (build: `redirectUri`, `postLogoutRedirectUri`)
+### Variables de entorno (terraform)
+- `TF_VAR_environment_name` = `dev`
+- `TF_VAR_domain_name` = `pasalapeli-frontend`
 
-### HTTPS
-- El `nginx.conf` sirve en **443** (certs en `/etc/nginx/certs/`, montados por el compose) y redirige **80 → 443**.
-- Los certificados los emite **Let's Encrypt** (`scripts/` del repo orquestador) y se renuevan automáticamente vía cron.
-- **Requisito:** dominio apuntando al EC2. Azure AD exige redirect URIs HTTPS.
+### Imagen ECR
+El contenedor se extrae de `pasalapeli-images` (repo ECR compartido) como `frontend:latest`. Construir y pushear la imagen a ECR antes o después del despliegue EKS.
+
+## 🔐 Integración MSAL
+- `msal.config.ts`: configuración de `PublicClientApplication`, redirecciones y caché local.
+- `MsalGuard`: protege rutas sensibles (compras, historial de tickets, panel admin).
+- `MsalInterceptor`: inyecta el token Bearer JWT en peticiones al BFF.
